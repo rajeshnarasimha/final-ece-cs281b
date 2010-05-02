@@ -14,7 +14,7 @@
 #include <cv.h>
 #include <highgui.h>
 
-//
+//Utils
 #include <utils.h>
 
 //Helper Functions
@@ -24,8 +24,13 @@ static void keyboardHandler(const int key);
 //State variable of the program
 static bool run = true;
 
+//WindowName
 static const char* display = "Video";
+#ifdef VISUAL
+static const char* diffWin  = "Difference";
+#endif
 
+//Entry Point!
 int main(int argc, char** argv){
   if( argc != 3 ){
     usage();
@@ -34,7 +39,7 @@ int main(int argc, char** argv){
 
   /////////////////////////////////////////////////////
   //Loading Arguments
-  IplImage*  bg_rgb  = cvLoadImage( argv[1] );
+  IplImage*  bg_bgr  = cvLoadImage( argv[1] );
   CvCapture* capture = cvCaptureFromFile( argv[2] );
 
   if( !capture ){
@@ -55,18 +60,36 @@ int main(int argc, char** argv){
   ImagesBundle bundle(frame);
   cvNamedWindow(display);
 
+#ifdef VISUAL
+  cvNamedWindow(diffWin);
+#endif
+
   //Initializing Tracker
+  imgutils::bgr2gray(bg_bgr, bundle.bg8u);
   
   //Main Loop
   while( frame && run ){
     cvShowImage(display, frame);
     keyboardHandler( cvWaitKey(rate) );
 
+    //Background Subtraction
+    imgutils::bgr2gray(frame, bundle.frame8u);
+    imgutils::bg_subtract(bundle.frame8u, bundle.bg8u, bundle.diff);
+    
+#ifdef VISUAL
+    //Visual Verbosing
+    cvShowImage(diffWin, bundle.diff);
+#endif
+
     frame = cvQueryFrame(capture);
   }//~End of While
 
-  cvReleaseImage(&bg_rgb);
+  cvReleaseImage(&bg_bgr);
   cvReleaseCapture(&capture);
+
+#ifdef VISUAL
+  cvDestroyWindow(diffWin);
+#endif
 
   cvDestroyWindow(display);
 

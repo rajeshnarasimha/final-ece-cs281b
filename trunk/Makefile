@@ -26,6 +26,10 @@ OBJDIR_DEB = obj_d
 BINDIR_DEF = bin
 BINDIR_DEB = bin_d
 
+ifeq "$(visual)" "y"
+	CXXFLAGS += -DVISUAL
+endif
+
 ifeq "$(debug)" "y"
 	CXXFLAGS += -g -ggdb -DDEBUG
 	OBJDIR   = $(OBJDIR_DEB)
