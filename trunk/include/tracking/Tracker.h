@@ -15,10 +15,14 @@
 
 class Tracker{
 public:
-  explicit Tracker(const IplImage* T);
+  explicit Tracker(const IplImage* T, const cv::Rect& roi);
   virtual ~Tracker(void);
+
+  //Functions
+  virtual CvRect track(const IplImage* frame) = 0;
 protected:
   IplImage* T;
+  cv::Rect roi;
 };
 
 #endif

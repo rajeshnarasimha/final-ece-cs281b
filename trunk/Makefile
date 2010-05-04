@@ -66,6 +66,7 @@ $(OBJDIR)/%.o: %.cpp
 OBJS=\
 	$(OBJDIR)/Tracking/Tracker.o \
 	$(OBJDIR)/Tracking/L1MinTracker.o \
+	$(OBJDIR)/Tracking/MeanShift.o \
 	$(OBJDIR)/utils/utils.o \
 	main.o 
 
