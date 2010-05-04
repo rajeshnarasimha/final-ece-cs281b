@@ -9,12 +9,18 @@
 
 #include <Tracker.h>
 
-Tracker::Tracker(const IplImage* _T){
-  T = cvCloneImage(_T);
+Tracker::Tracker(const IplImage* _T, const cv::Rect& _roi){
+  T   = cvCloneImage(_T);
+  roi = _roi;
 }
 
 Tracker::~Tracker(void){
   if( T ){
     cvReleaseImage(&T);
   }
+}
+
+CvRect Tracker::track(const IplImage* patch){
+  static CvRect c = cvRect(0,0,0,0);
+  return c;
 }

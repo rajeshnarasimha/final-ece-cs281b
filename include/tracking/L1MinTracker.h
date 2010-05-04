@@ -13,10 +13,10 @@
 
 class L1MinTracker : public Tracker{
 public:
-  explicit L1MinTracker(const IplImage* T);
+  explicit L1MinTracker(const IplImage* T, const cv::Rect& roi);
   ~L1MinTracker(void);
-protected:
-  IplImage* T;
+
+  CvRect track(const IplImage* frame);
 };
 
 #endif

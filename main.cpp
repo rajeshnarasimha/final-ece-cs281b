@@ -55,6 +55,10 @@ int main(int argc, char** argv){
   int rate = 
     static_cast<int>( ceil(1000.0 / ((fps == 1000 || fps == 500) ? 25 : fps)) );
 
+#ifdef DEBUG
+  std::cout << "<<DEBUG>> FPS: " << fps << std::endl;
+#endif
+
   //Initializing Display
   IplImage* frame = cvQueryFrame(capture);
   ImagesBundle bundle(frame);
