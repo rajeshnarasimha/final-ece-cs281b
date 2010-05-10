@@ -68,7 +68,8 @@ OBJS=\
 	$(OBJDIR)/Tracking/L1MinTracker.o \
 	$(OBJDIR)/Tracking/MeanShift.o \
 	$(OBJDIR)/utils/utils.o \
-	main.o 
+	$(OBJDIR)/utils/Histogram.o 
+#	main.o 
 
 TARGET=recog
 
@@ -76,14 +77,20 @@ TARGET=recog
 all: main
 
 main: $(TARGET)
-	$(LD) -o $(TARGET) $(OBJS) $(LDLIBS)
+	$(CXX) -c main.cpp $(CXXFLAGS) -o $(OBJDIR)/main.o
+	$(LD) -o $(TARGET) $(OBJS) $(OBJDIR)/main.o $(LDLIBS)
 
 $(TARGET) : $(OBJS)
 
+testTracking: $(OBJS) test/MeanShiftTest.cpp
+	$(CXX) -c test/MeanShiftTest.cpp $(CXXFLAGS) -o test/MeanShiftTest.o
+	$(LD) -o test/testTracking $(OBJS) test/MeanShiftTest.o $(LDLIBS)
+
+
 clean:
-	rm *.o
 	rm -rf $(OBJDIR_DEF) $(OBJDIR_DEB)
 	rm -rf $(BINDIR_DEF) $(BINDIR_DEB)
+	rm *.o
 	rm $(TARGET)
 
 

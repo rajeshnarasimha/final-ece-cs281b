@@ -17,6 +17,9 @@
 //Utils
 #include <utils.h>
 
+//
+#include <MeanShift.h>
+
 //Helper Functions
 static inline void usage(void);
 static void keyboardHandler(const int key);
@@ -70,6 +73,7 @@ int main(int argc, char** argv){
 
   //Initializing Tracker
   imgutils::bgr2gray(bg_bgr, bundle.bg8u);
+  MeanShift tracker(frame, 180, cvRect(0,0,frame->width, frame->height), 0.2, HSV);
   
   //Main Loop
   while( frame && run ){
