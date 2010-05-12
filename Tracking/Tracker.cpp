@@ -12,6 +12,7 @@
 Tracker::Tracker(const IplImage* _T, const cv::Rect& _roi){
   T   = cvCloneImage(_T);
   roi = _roi;
+  state = IDLE;
 }
 
 Tracker::~Tracker(void){

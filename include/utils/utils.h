@@ -11,6 +11,7 @@
 
 #include <cv.h>
 #include <highgui.h>
+#include <iostream>
 
 struct ImagesBundle{
   ImagesBundle(IplImage* frame){
@@ -86,6 +87,42 @@ namespace imgutils{
     cv::Scalar c = difference(a,b);
     return dotProduct(c,c);
   }
+
+  inline void dumpRectangle( const cv::Rect& r){
+    std::cout << "X: " << r.x << std::endl;
+    std::cout << "Y: " << r.y << std::endl;
+    std::cout << "Width: " << r.width   << std::endl;
+    std::cout << "Height: " << r.height << std::endl;
+  }
+
+  //Helpef Functions for Tracking
+  void buildRGBHistogram(const IplImage* patch, 
+                         cv::MatND& histogram,
+                         const int& bins,
+                         const cv::Mat& mask);
+  
+  void buildHsvHistogram(const IplImage* patch, 
+                         cv::MatND& histogram,
+                         const int& bins,
+                         const cv::Mat& mask);
+  
+  void buildHueHistogram(const IplImage* patch, 
+                         cv::MatND& histogram,
+                         const int& bins,
+                         const cv::Mat& mask);
+
+  void computeBackProjectionRGB(const cv::Mat& T,
+                                const cv::MatND& histogram, 
+                                cv::Mat& backProj);
+
+  void computeBackProjectionHSV(const cv::Mat& T,
+                                const cv::MatND& histogram, 
+                                cv::Mat& backProj);
+  
+  void computeBackProjectionHue(const cv::Mat& T,
+                                const cv::MatND& histogram, 
+                                cv::Mat& backProj);
+
 }
 
 #endif

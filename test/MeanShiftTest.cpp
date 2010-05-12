@@ -39,19 +39,21 @@ int main(int argc, char** argv){
 #endif
 
   //Initializing Display
-  IplImage* frame   = cvQueryFrame(capture);
-  IplImage* cropped = 0;
+  IplImage* frame       = cvQueryFrame(capture);
+  IplImage* visualFrame = cvCloneImage(frame);
   CvRect roi = cvRect( 0,0,0,0 );
   cvNamedWindow(display);
   cvSetMouseCallback(display,mouseHandler,&roi);
 
+  std::cout << "Width:  " << frame->width << std::endl;
+  std::cout << "Height: " << frame->height<< std::endl;
+
   //Initializing Tracker
-  //MeanShift tracker(frame, 180, cvRect(0,0,frame->width, frame->height), 0.2, HSV);
   MeanShift* tracker = 0;
   
   //Main Loop
   while( frame ){
-    cvShowImage(display, frame);
+    cvShowImage(display, visualFrame);
     keyboardHandler( cvWaitKey(rate) );
 
     if( exitFlag ){
@@ -59,25 +61,39 @@ int main(int argc, char** argv){
     }
 
     //Tracking
-
     if( run ){ 
       frame = cvQueryFrame(capture); 
+      cvCopy(frame, visualFrame);      
     }else{
-
       if( roiSet ){
         //Call Tracker
-        tracker = new MeanShift(frame, 180, roi, 0.2, HUE);
+        tracker = new MeanShift(frame, 180, roi, cv::Size(7,7), 3.5, HUE);
         roiSet = false;
+
+        cv::RotatedRect loc = tracker->getLocation();
+        cv::Rect rect = loc.boundingRect();
+        cv::Mat f = visualFrame;
+        cv::rectangle(f, cv::Point(rect.x, rect.y), 
+                      cv::Point(rect.x + rect.width, rect.y + rect.height),
+                      cv::Scalar(0.0, 0.0, 255.0));
       }
     }
+
+    if( tracker && tracker->state == TRACKING ){
+      cv::Mat f = visualFrame;
+      cv::Rect location = tracker->track(frame);
+      cv::rectangle(f, 
+                    cv::Point(location.x, location.y), 
+                    cv::Point(location.x + location.width, 
+                              location.y + location.height),
+                    cv::Scalar(0.0, 0.0, 255.0));
+    }
+
   }//~End of While
 
   cvReleaseCapture(&capture);
+  cvReleaseImage(&visualFrame);
   
-  if( cropped ){
-    cvReleaseImage(&cropped);
-  }
-
   cvDestroyWindow(display);
   delete tracker;
 
