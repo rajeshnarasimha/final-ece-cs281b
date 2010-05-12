@@ -13,10 +13,18 @@
 #include <cv.h>
 #include <highgui.h>
 
+enum TrackingState{
+  IDLE,
+  TRACKING,
+  LOST
+};
+
 class Tracker{
 public:
   explicit Tracker(const IplImage* T, const cv::Rect& roi);
   virtual ~Tracker(void);
+
+  enum TrackingState state;
 
   //Functions
   virtual CvRect track(const IplImage* frame) = 0;
