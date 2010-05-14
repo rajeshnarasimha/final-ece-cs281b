@@ -14,7 +14,7 @@ using namespace cv;
 void imgutils::buildRGBHistogram(const IplImage* patch, 
                                  MatND& histogram, 
                                  const int& bins,
-                                 const Mat& mask){
+                                 Mat& mask){
   int  histSize[] = {bins, bins, bins};
   float   range[] = {0.0f, 255.0f};
   const float* ranges[] = { range, 
@@ -37,9 +37,17 @@ void imgutils::buildRGBHistogram(const IplImage* patch,
 void imgutils::buildHsvHistogram(const IplImage* patch, 
                                  MatND& histogram,
                                  const int& bins,
-                                 const Mat& mask){
+                                 Mat& mask, 
+                                 const Scalar& hsmin, 
+                                 const Scalar& hsmax,
+                                 const Rect& roi){
   Mat hsv;
   cvtColor(patch, hsv, CV_BGR2HSV);
+
+  Mat hsv_roi = Mat(hsv, roi);
+  Mat maskROI = Mat(mask, roi);
+
+  inRange(hsv_roi, hsmin, hsmax, maskROI);
 
   int  histSize[] = {bins, bins};
   float h_range[] = {0.0f, 180.0f};
@@ -85,9 +93,17 @@ void imgutils::buildHsvHistogram(const IplImage* patch,
 void imgutils::buildHueHistogram(const IplImage* patch, 
                                  MatND& histogram,
                                  const int& bins,
-                                 const Mat& mask){
+                                 Mat& mask,
+                                 const Scalar& hsmin, 
+                                 const Scalar& hsmax,
+                                 const Rect& roi){
   Mat hsv;
   cvtColor(patch, hsv, CV_BGR2HSV);
+
+  Mat maskROI = Mat(mask, roi);
+  Mat hsv_roi = Mat(hsv, roi);
+
+  inRange(hsv_roi, hsmin, hsmax, maskROI);
   
   int  histSize[] = {bins};
   float h_range[] = {0.0f, 180.0f};
@@ -148,11 +164,16 @@ void imgutils::computeBackProjectionRGB(const Mat& T,
 
 void imgutils::computeBackProjectionHSV(const Mat& T,
                                         const MatND& histogram, 
-                                        Mat& backProj){
+                                        Mat& backProj,
+                                        Mat& mask,
+                                        const Scalar& hsmin,
+                                        const Scalar& hsmax){
 
   Mat hsv;
   cvtColor(T, hsv, CV_BGR2HSV);
   
+  inRange(hsv, hsmin, hsmax, mask);
+
   //Compute Confidence Map i.e. prob distribution over ROI
   const int  channels[] = {0, 1};  
   float h_range[] = {0.0f, 180.0f};
@@ -178,9 +199,14 @@ void imgutils::computeBackProjectionHSV(const Mat& T,
 
 void imgutils::computeBackProjectionHue(const Mat& T, //Hue image plane
                                         const MatND& histogram, 
-                                        Mat& backProj){
+                                        Mat& backProj,
+                                        Mat& mask,
+                                        const Scalar& hsmin,
+                                        const Scalar& hsmax){
   Mat hsv;
   cvtColor(T, hsv, CV_BGR2HSV);
+
+  inRange(hsv, hsmin, hsmax, mask);
   
   //Compute Confidence Map i.e. prob distribution over ROI
   const int  channels[] = {0};  
@@ -202,3 +228,35 @@ void imgutils::computeBackProjectionHue(const Mat& T, //Hue image plane
 #endif
 
 }
+
+void imgutils::maskFrameGray(const Mat& frame, const Mat& src2, Mat& maskedFrame){
+  Mat gray;
+  cvtColor(frame, gray, CV_BGR2GRAY);
+  bitwise_and(gray, src2, maskedFrame);
+}
+
+void imgutils::maskFrameGray(const Mat& frame, const Rect& roi, Mat& maskedFrame){
+  Mat gray;
+  cvtColor(frame, gray, CV_BGR2GRAY);
+  maskedFrame = Scalar(0);
+  maskedFrame += Mat(gray, roi);
+}
+
+
+void imgutils::maskFrameRGB(const Mat& frame, const Mat& src2, Mat& maskedFrame){
+  std::vector<cv::Mat> planes;
+  std::vector<cv::Mat> masked_planes;    
+
+  masked_planes.push_back(Mat::zeros(frame.rows, frame.cols, CV_8U));
+  masked_planes.push_back(Mat::zeros(frame.rows, frame.cols, CV_8U));
+  masked_planes.push_back(Mat::zeros(frame.rows, frame.cols, CV_8U));
+
+  cv::split(frame, planes);
+  cv::bitwise_and(planes[0], src2, masked_planes[0]);
+  cv::bitwise_and(planes[1], src2, masked_planes[1]);
+  cv::bitwise_and(planes[2], src2, masked_planes[2]);
+
+  cv::merge(masked_planes, maskedFrame);
+}
+
+

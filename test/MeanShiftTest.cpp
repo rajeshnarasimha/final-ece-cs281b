@@ -1,4 +1,5 @@
 #include <MeanShift.h>
+#include <utils.h>
 #include <iostream>
 
 using namespace std;
@@ -12,14 +13,15 @@ static bool roiSet = false;
 static bool exitFlag = false;
 
 int main(int argc, char** argv){
-  if( argc != 2 ){
-    cout << argv[0] << " <videoFile>" << endl;
+  if( argc != 3 ){
+    cout << argv[0] << " <videoFile> <bg>" << endl;
     return 1;
   }
 
   /////////////////////////////////////////////////////
   //Loading Arguments
   CvCapture* capture = cvCaptureFromFile( argv[1] );
+  IplImage* bg = cvLoadImage(argv[2]);
 
   if( !capture ){
     std::cerr << "Unable to play Video" << std::endl;
@@ -50,43 +52,62 @@ int main(int argc, char** argv){
 
   //Initializing Tracker
   MeanShift* tracker = 0;
-  
+
+  //Using BG-Subtraction
+  ImagesBundle bundle(frame);
+  cv::Mat frame_track = cv::Mat::zeros(frame->height, frame->width, CV_8UC3);
+
+  imgutils::bgr2gray(bg, bundle.bg8u);
+
   //Main Loop
+  cv::Mat maskedFrame;
   while( frame ){
-    cvShowImage(display, visualFrame);
-    keyboardHandler( cvWaitKey(rate) );
+    cvCopy(frame, visualFrame);      
 
-    if( exitFlag ){
-      break;
+    //Background Subtraction
+    imgutils::bgr2gray(frame, bundle.frame8u);
+    imgutils::bg_subtract(bundle.frame8u, bundle.bg8u, bundle.diff);
+    
+    //Extract Moving Object
+    imgutils::maskFrameRGB(frame, bundle.diff, maskedFrame);
+
+    if( exitFlag ) break;
+
+    //Set the Region to Track
+    if( roiSet ){
+      //Call Tracker
+      tracker = new MeanShift(frame, 16, roi, cv::Size(7,7),
+                              cv::Scalar(  0.0,  5.0,   5.0), 
+                              cv::Scalar(180.0, 250.0, 250.0), 3.5, 
+                              10.0, 250.0, HUE);
+      roiSet = false;
+      
+      cv::RotatedRect loc = tracker->getLocation();
+      cv::Rect rect = loc.boundingRect();
+      cv::Mat f = visualFrame;
+      cv::rectangle(f, cv::Point(rect.x, rect.y), 
+                    cv::Point(rect.x + rect.width, rect.y + rect.height),
+                    cv::Scalar(255.0, 0.0, 0.0));
+
     }
 
-    //Tracking
-    if( run ){ 
-      frame = cvQueryFrame(capture); 
-      cvCopy(frame, visualFrame);      
-    }else{
-      if( roiSet ){
-        //Call Tracker
-        tracker = new MeanShift(frame, 180, roi, cv::Size(7,7), 3.5, HUE);
-        roiSet = false;
 
-        cv::RotatedRect loc = tracker->getLocation();
-        cv::Rect rect = loc.boundingRect();
-        cv::Mat f = visualFrame;
-        cv::rectangle(f, cv::Point(rect.x, rect.y), 
-                      cv::Point(rect.x + rect.width, rect.y + rect.height),
-                      cv::Scalar(0.0, 0.0, 255.0));
-      }
-    }
-
+    //If tracking
     if( tracker && tracker->state == TRACKING ){
       cv::Mat f = visualFrame;
-      cv::Rect location = tracker->track(frame);
+      cv::Rect location = tracker->track(maskedFrame);
       cv::rectangle(f, 
                     cv::Point(location.x, location.y), 
                     cv::Point(location.x + location.width, 
                               location.y + location.height),
-                    cv::Scalar(0.0, 0.0, 255.0));
+                    cv::Scalar(255.0, 0.0, 0.0));
+    }
+
+    cvShowImage(display, visualFrame);
+    keyboardHandler( cvWaitKey(rate) );
+
+    if( run ){ 
+      frame = cvQueryFrame(capture); 
     }
 
   }//~End of While
@@ -123,6 +144,7 @@ static void mouseHandler(int event, int x, int y, int flags, void* param){
     roi->width = x - roi->x; //Assuming positive selection
     roi->height= y - roi->y; //Assuming positive selection
     roiSet = true;
+    std::cout << "ROI Set" << std::endl;
     break;
   }
 }
