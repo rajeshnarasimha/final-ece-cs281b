@@ -21,16 +21,20 @@ enum TrackingState{
 
 class Tracker{
 public:
-  explicit Tracker(const IplImage* T, const cv::Rect& roi);
+  Tracker(const IplImage* T, const cv::Rect& roi);
+  Tracker(const cv::Mat& T,  const cv::Rect& roi);
   virtual ~Tracker(void);
 
   enum TrackingState state;
 
   //Functions
   virtual CvRect track(const IplImage* frame) = 0;
+  virtual CvRect track(const cv::Mat& frame) = 0;
 protected:
   IplImage* T;
   cv::Rect roi;
+
+  void releaseTemplate(void);
 };
 
 #endif

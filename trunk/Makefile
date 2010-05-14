@@ -11,8 +11,8 @@
 CC        = g++
 LD        = $(CC)
 CXXFLAGS  = -Wall -pedantic -I. 
-OPENCV_INC=`pkg-config --cflags opencv`
-OPENCV_LIB=`pkg-config --libs opencv`
+OPENCV_INC=`pkg-config --cflags opencv-2.1`
+OPENCV_LIB=`pkg-config --libs opencv-2.1`
 LDLIBS    = $(OPENCV_LIB)
 
 INCLUDE= $(OPENCV_INC) \
@@ -67,6 +67,7 @@ OBJS=\
 	$(OBJDIR)/Tracking/Tracker.o \
 	$(OBJDIR)/Tracking/L1MinTracker.o \
 	$(OBJDIR)/Tracking/MeanShift.o \
+	$(OBJDIR)/Tracking/LucasKanade.o \
 	$(OBJDIR)/utils/utils.o \
 	$(OBJDIR)/utils/Histogram.o 
 #	main.o 
@@ -83,8 +84,12 @@ main: $(TARGET)
 $(TARGET) : $(OBJS)
 
 testTracking: $(OBJS) test/MeanShiftTest.cpp
+	@echo \<\<MeanShiftTracking Test\>\>
 	$(CXX) -c test/MeanShiftTest.cpp $(CXXFLAGS) -o test/MeanShiftTest.o
-	$(LD) -o test/testTracking $(OBJS) test/MeanShiftTest.o $(LDLIBS)
+	$(LD) -o test/meanShiftTracking $(OBJS) test/MeanShiftTest.o $(LDLIBS)
+	@echo \<\<LucasKanadeTracking Test\>\>
+	$(CXX) -c test/LucasKanadeTest.cpp $(CXXFLAGS) -o test/LucasKanadeTest.o
+	$(LD) -o test/lkTracking $(OBJS) test/LucasKanadeTest.o $(LDLIBS)
 
 
 clean:

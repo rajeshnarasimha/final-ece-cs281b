@@ -23,17 +23,22 @@ struct ImagesBundle{
 
     diff = cvCreateImage(cvSize(frame->width, frame->height), 
                          IPL_DEPTH_8U, 1);
+
+    mask = cvCreateImage(cvSize(frame->width, frame->height), 
+                         IPL_DEPTH_8U, 3);
   }
 
   ~ImagesBundle(void){
     cvReleaseImage(&frame8u);
     cvReleaseImage(&bg8u);
     cvReleaseImage(&diff);
+    cvReleaseImage(&mask);
   }
 
   IplImage* frame8u; //Frame GrayScale
   IplImage* bg8u;    //Background GrayScale
   IplImage* diff;
+  IplImage* mask;
 };
 
 namespace imgutils{
@@ -42,9 +47,22 @@ namespace imgutils{
     cvCvtColor(bgr, gray, CV_BGR2GRAY);
   }
   
+  void maskFrameRGB(const cv::Mat& frame, 
+                    const cv::Mat& src2, 
+                    cv::Mat& maskedFrame);
+
+  void maskFrameGray(const cv::Mat& frame, 
+                     const cv::Mat& src2, 
+                     cv::Mat& maskedFrame);
+
+  void maskFrameGray(const cv::Mat& frame, 
+                     const cv::Rect& roi, 
+                     cv::Mat& maskedFrame);
+
+
   inline
   void bg_subtract(const IplImage* frame, const IplImage* bg, 
-                             IplImage* dst){
+                   IplImage* dst){
     cvAbsDiff(frame, bg, dst);
     cvThreshold(dst, dst, 64.0, 255.0, CV_THRESH_BINARY);
     cvSmooth(dst, dst, CV_MEDIAN, 3);
@@ -99,17 +117,23 @@ namespace imgutils{
   void buildRGBHistogram(const IplImage* patch, 
                          cv::MatND& histogram,
                          const int& bins,
-                         const cv::Mat& mask);
+                         cv::Mat& mask);
   
   void buildHsvHistogram(const IplImage* patch, 
                          cv::MatND& histogram,
                          const int& bins,
-                         const cv::Mat& mask);
+                         cv::Mat& mask,
+                         const cv::Scalar& hsmin, 
+                         const cv::Scalar& hsmax,
+                         const cv::Rect& roi);
   
   void buildHueHistogram(const IplImage* patch, 
                          cv::MatND& histogram,
                          const int& bins,
-                         const cv::Mat& mask);
+                         cv::Mat& mask,
+                         const cv::Scalar& hsmin, 
+                         const cv::Scalar& hsmax,
+                         const cv::Rect& roi);
 
   void computeBackProjectionRGB(const cv::Mat& T,
                                 const cv::MatND& histogram, 
@@ -117,11 +141,17 @@ namespace imgutils{
 
   void computeBackProjectionHSV(const cv::Mat& T,
                                 const cv::MatND& histogram, 
-                                cv::Mat& backProj);
+                                cv::Mat& backProj,
+                                cv::Mat& mask,
+                                const cv::Scalar& hsmin,
+                                const cv::Scalar& hsmax);
   
   void computeBackProjectionHue(const cv::Mat& T,
                                 const cv::MatND& histogram, 
-                                cv::Mat& backProj);
+                                cv::Mat& backProj,
+                                cv::Mat& mask,
+                                const cv::Scalar& hsmin,
+                                const cv::Scalar& hsmax);
 
 }
 
