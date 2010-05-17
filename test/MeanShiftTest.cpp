@@ -101,6 +101,8 @@ int main(int argc, char** argv){
                     cv::Point(location.x + location.width, 
                               location.y + location.height),
                     cv::Scalar(255.0, 0.0, 0.0));
+
+      rate = 2;
     }
 
     cvShowImage(display, visualFrame);

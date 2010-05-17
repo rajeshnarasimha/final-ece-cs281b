@@ -259,4 +259,45 @@ void imgutils::maskFrameRGB(const Mat& frame, const Mat& src2, Mat& maskedFrame)
   cv::merge(masked_planes, maskedFrame);
 }
 
+void imgutils::findSurroundingBox(const std::vector<cv::Point2f>& corners, 
+                                  const std::vector<unsigned char>& status,
+                                  cv::Rect& roi, const cv::Size& dim,
+                                  const cv::Point& compensation){
+  std::vector<cv::Point2f>::const_iterator it;
+  std::vector<unsigned char>::const_iterator it_status;  
+  
+  std::vector<unsigned int> x_components;
+  std::vector<unsigned int> y_components;
+  
+  for( it = corners.begin(), it_status = status.begin();
+       it != corners.end(); ++it, ++it_status){
+    if( (*it_status) ){//Push onto the vectors
+      x_components.push_back( static_cast<unsigned int>( (*it).x ) );
+      y_components.push_back( static_cast<unsigned int>( (*it).y ) );
+    }
+  }
+
+  //Sort the components
+  if( !x_components.empty() && !y_components.empty() ){
+    std::sort(x_components.begin(), x_components.end());
+    std::sort(y_components.begin(), y_components.end());
+
+    //Beware of the boundaries
+    roi.x = x_components[0] - compensation.x;
+    roi.x = roi.x < 0 ? 0 : roi.x;
+
+    roi.y = y_components[0] - compensation.y;
+    roi.y = roi.y < 0 ? 0 : roi.y;
+
+    roi.width  = x_components.back() - roi.x + 2*compensation.x;
+    roi.width  = (roi.x + roi.width < dim.width) ? 
+      roi.width : dim.width - roi.x - 1;
+
+    roi.height = y_components.back() - roi.y + 2*compensation.y;
+    roi.height = (roi.y + roi.height < dim.height) ? 
+      roi.height : dim.height - roi.y - 1 ;
+
+  }
+}
+
 

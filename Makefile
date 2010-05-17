@@ -8,16 +8,25 @@
 #
 
 # Makefile for Project CS/ECE 281b
-CC        = g++
-LD        = $(CC)
+CXX       = g++
+CC        = gcc
+LD        = $(CXX)
 CXXFLAGS  = -Wall -pedantic -I. 
 OPENCV_INC=`pkg-config --cflags opencv-2.1`
 OPENCV_LIB=`pkg-config --libs opencv-2.1`
+IPPINC=opt/intel/Compiler/11.1/056/include/
+IPPLIBHOME=-L/opt/intel/Compiler/11.1/056/lib/ia32
+IPPLIBS   = $(IPPLIBHOME) \
+	-lcxaguard  -lguide  -lguide_stats  -limf  -lintlc  -liomp5 \
+	-liompprof5  -liompstubs5  -lirc  -lomp_db  -lompstub  \
+	-lpdbx  -lsvml -lpthread
+#LDLIBS    = $(OPENCV_LIB) $(IPPLIBS)
 LDLIBS    = $(OPENCV_LIB)
 
 INCLUDE= $(OPENCV_INC) \
 	-I./include/utils \
 	-I./include/tracking \
+	-I./3rdParty/fast-C-src-2.1/ \
 
 CXXFLAGS += $(INCLUDE)
 
@@ -42,6 +51,10 @@ endif
 
 
 ### generic targets
+$(OBJDIR)/3rdParty/fast-C-src-2.1/%.o: ./3rdParty/fast-C-src-2.1/%.c
+	if [ ! -f $@ ] ; then mkdir -p $@ ; rmdir $@; fi ; \
+    $(CC) $< -o $@ -c $(CXXFLAGS)
+
 $(OBJDIR)/Tracking/%.o: ./Tracking/%.cpp
 	if [ ! -f $@ ] ; then mkdir -p $@ ; rmdir $@; fi ; \
     $(CXX) $< -o $@ -c $(CXXFLAGS)
@@ -69,7 +82,14 @@ OBJS=\
 	$(OBJDIR)/Tracking/MeanShift.o \
 	$(OBJDIR)/Tracking/LucasKanade.o \
 	$(OBJDIR)/utils/utils.o \
-	$(OBJDIR)/utils/Histogram.o 
+	$(OBJDIR)/utils/Histogram.o \
+	$(OBJDIR)/utils/FASTCVWrapper.o \
+	$(OBJDIR)/3rdParty/fast-C-src-2.1/fast.o \
+	$(OBJDIR)/3rdParty/fast-C-src-2.1/fast_9.o \
+	$(OBJDIR)/3rdParty/fast-C-src-2.1/fast_10.o \
+	$(OBJDIR)/3rdParty/fast-C-src-2.1/fast_11.o \
+	$(OBJDIR)/3rdParty/fast-C-src-2.1/fast_12.o \
+	$(OBJDIR)/3rdParty/fast-C-src-2.1/nonmax.o \
 #	main.o 
 
 TARGET=recog

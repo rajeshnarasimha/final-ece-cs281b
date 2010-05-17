@@ -6,6 +6,7 @@
  * Norma S. Savage   <saiph@cs.ucsb.edu>
  * Victor M. Fragoso <vfragoso@cs.ucsb.edu>
  */
+
 #ifndef __UTILS__
 #define __UTILS__
 
@@ -39,6 +40,12 @@ struct ImagesBundle{
   IplImage* bg8u;    //Background GrayScale
   IplImage* diff;
   IplImage* mask;
+};
+
+struct HistogramParams{
+  int* histSize;
+  float** ranges;
+  int* channels;
 };
 
 namespace imgutils{
@@ -152,6 +159,11 @@ namespace imgutils{
                                 cv::Mat& mask,
                                 const cv::Scalar& hsmin,
                                 const cv::Scalar& hsmax);
+
+  void findSurroundingBox(const std::vector<cv::Point2f>& corners, 
+                          const std::vector<unsigned char>& status,
+                          cv::Rect& roi, const cv::Size& dim,
+                          const cv::Point& compensation);
 
 }
 
