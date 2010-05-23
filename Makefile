@@ -26,7 +26,10 @@ LDLIBS    = $(OPENCV_LIB)
 INCLUDE= $(OPENCV_INC) \
 	-I./include/utils \
 	-I./include/tracking \
-	-I./3rdParty/fast-C-src-2.1/ \
+	-I./include/motion_analysis \
+	-I./include/descriptors \
+
+	# -I./3rdParty/fast-C-src-2.1/ \
 
 CXXFLAGS += $(INCLUDE)
 
@@ -67,7 +70,11 @@ $(OBJDIR)/Recognition/%.o: ./Recognition/%.cc
 	if [ ! -f $@ ] ; then mkdir -p $@ ; rmdir $@; fi ; \
     $(CXX) $< -o $@ -c $(CXXFLAGS)
 
-$(OBJDIR)/Descriptors/%.o: ../Descriptors/%.cpp
+$(OBJDIR)/Descriptors/%.o: ./Descriptors/%.cpp
+	if [ ! -f $@ ] ; then mkdir -p $@ ; rmdir $@; fi ; \
+    $(CXX) $< -o $@ -c $(CXXFLAGS)
+
+$(OBJDIR)/MotionAnalysis/%.o: ./MotionAnalysis/%.cpp
 	if [ ! -f $@ ] ; then mkdir -p $@ ; rmdir $@; fi ; \
     $(CXX) $< -o $@ -c $(CXXFLAGS)
 
@@ -78,18 +85,22 @@ $(OBJDIR)/%.o: %.cpp
 
 OBJS=\
 	$(OBJDIR)/Tracking/Tracker.o \
-	$(OBJDIR)/Tracking/L1MinTracker.o \
 	$(OBJDIR)/Tracking/MeanShift.o \
 	$(OBJDIR)/Tracking/LucasKanade.o \
 	$(OBJDIR)/utils/utils.o \
-	$(OBJDIR)/utils/Histogram.o \
-	$(OBJDIR)/utils/FASTCVWrapper.o \
-	$(OBJDIR)/3rdParty/fast-C-src-2.1/fast.o \
-	$(OBJDIR)/3rdParty/fast-C-src-2.1/fast_9.o \
-	$(OBJDIR)/3rdParty/fast-C-src-2.1/fast_10.o \
-	$(OBJDIR)/3rdParty/fast-C-src-2.1/fast_11.o \
-	$(OBJDIR)/3rdParty/fast-C-src-2.1/fast_12.o \
-	$(OBJDIR)/3rdParty/fast-C-src-2.1/nonmax.o \
+	$(OBJDIR)/MotionAnalysis/MotionAnalyzer.o \
+	$(OBJDIR)/Descriptors/hog.o \
+#	$(OBJDIR)/MotionAnalysis/LagrangeInterpolator.o \
+#	$(OBJDIR)/MotionAnalysis/BSplineFitting.o \
+	# $(OBJDIR)/utils/Histogram.o \
+	# $(OBJDIR)/utils/FASTCVWrapper.o \
+	# $(OBJDIR)/Tracking/L1MinTracker.o \
+	# $(OBJDIR)/3rdParty/fast-C-src-2.1/fast.o \
+	# $(OBJDIR)/3rdParty/fast-C-src-2.1/fast_9.o \
+	# $(OBJDIR)/3rdParty/fast-C-src-2.1/fast_10.o \
+	# $(OBJDIR)/3rdParty/fast-C-src-2.1/fast_11.o \
+	# $(OBJDIR)/3rdParty/fast-C-src-2.1/fast_12.o \
+	# $(OBJDIR)/3rdParty/fast-C-src-2.1/nonmax.o \
 #	main.o 
 
 TARGET=recog
@@ -103,7 +114,7 @@ main: $(TARGET)
 
 $(TARGET) : $(OBJS)
 
-testTracking: $(OBJS) test/MeanShiftTest.cpp
+testTracking: $(OBJS) test/MeanShiftTest.cpp test/LucasKanadeTest.cpp
 	@echo \<\<MeanShiftTracking Test\>\>
 	$(CXX) -c test/MeanShiftTest.cpp $(CXXFLAGS) -o test/MeanShiftTest.o
 	$(LD) -o test/meanShiftTracking $(OBJS) test/MeanShiftTest.o $(LDLIBS)
@@ -111,6 +122,14 @@ testTracking: $(OBJS) test/MeanShiftTest.cpp
 	$(CXX) -c test/LucasKanadeTest.cpp $(CXXFLAGS) -o test/LucasKanadeTest.o
 	$(LD) -o test/lkTracking $(OBJS) test/LucasKanadeTest.o $(LDLIBS)
 
+testMotion: $(OBJS) test/testMotionAnalyzer.cpp
+	$(CXX) -c test/testMotionAnalyzer.cpp $(CXXFLAGS) -o test/testMotionAnalyzer.o
+	$(LD) -o test/testManal $(OBJS) test/testMotionAnalyzer.o $(LDLIBS)
+
+
+testSVM: test/SVMTest.cpp
+	$(CXX) -c -g -ggdb test/SVMTest.cpp $(CXXFLAGS) -o test/SVMTest.o
+	$(LD) -o test/svmTest test/SVMTest.o $(LDLIBS)
 
 clean:
 	rm -rf $(OBJDIR_DEF) $(OBJDIR_DEB)

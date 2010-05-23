@@ -14,33 +14,51 @@
 #include <highgui.h>
 #include <iostream>
 
+// struct ImagesBundle{
+//   ImagesBundle(IplImage* frame){
+//     frame8u = cvCreateImage(cvSize(frame->width, frame->height), 
+//                             IPL_DEPTH_8U, 1);
+
+//     bg8u = cvCreateImage(cvSize(frame->width, frame->height), 
+//                          IPL_DEPTH_8U, 1);
+
+//     diff = cvCreateImage(cvSize(frame->width, frame->height), 
+//                          IPL_DEPTH_8U, 1);
+
+//     mask = cvCreateImage(cvSize(frame->width, frame->height), 
+//                          IPL_DEPTH_8U, 3);
+//   }
+
+//   ~ImagesBundle(void){
+//     cvReleaseImage(&frame8u);
+//     cvReleaseImage(&bg8u);
+//     cvReleaseImage(&diff);
+//     cvReleaseImage(&mask);
+//   }
+
+//   IplImage* frame8u; //Frame GrayScale
+//   IplImage* bg8u;    //Background GrayScale
+//   IplImage* diff;
+//   IplImage* mask;
+// };
+
 struct ImagesBundle{
-  ImagesBundle(IplImage* frame){
-    frame8u = cvCreateImage(cvSize(frame->width, frame->height), 
-                            IPL_DEPTH_8U, 1);
-
-    bg8u = cvCreateImage(cvSize(frame->width, frame->height), 
-                         IPL_DEPTH_8U, 1);
-
-    diff = cvCreateImage(cvSize(frame->width, frame->height), 
-                         IPL_DEPTH_8U, 1);
-
-    mask = cvCreateImage(cvSize(frame->width, frame->height), 
-                         IPL_DEPTH_8U, 3);
+  ImagesBundle(const cv::Mat& frame){
+    cv::cvtColor(frame, frame8u, CV_8UC1);
+    // bg8u = cv::Mat::zeros(frame8u.rows, frame8u.cols, CV_8UC1);
+    // diff = cv::Mat::zeros(frame8u.rows, frame8u.cols, CV_8UC1);
+    // mask = cv::Mat::zeros(frame8u.rows, frame8u.cols, CV_8UC1);
   }
 
   ~ImagesBundle(void){
-    cvReleaseImage(&frame8u);
-    cvReleaseImage(&bg8u);
-    cvReleaseImage(&diff);
-    cvReleaseImage(&mask);
   }
 
-  IplImage* frame8u; //Frame GrayScale
-  IplImage* bg8u;    //Background GrayScale
-  IplImage* diff;
-  IplImage* mask;
+  cv::Mat frame8u; //Frame GrayScale
+  cv::Mat bg8u;    //Background GrayScale
+  cv::Mat diff;
+  cv::Mat mask;
 };
+
 
 struct HistogramParams{
   int* histSize;
@@ -66,15 +84,30 @@ namespace imgutils{
                      const cv::Rect& roi, 
                      cv::Mat& maskedFrame);
 
-
   inline
+  void bgr2gray(const cv::Mat& bgr, cv::Mat& gray){
+    // IplImage* gray = cvCreateImage(cvSize(bgr->width, bgr->height),
+    //                                IPL_DEPTH_8U, 1);
+    // cvCvtColor(bgr, gray, CV_BGR2GRAY);
+    cv::cvtColor(bgr, gray, CV_BGR2GRAY);
+  }
+
+  inline 
   void bg_subtract(const IplImage* frame, const IplImage* bg, 
                    IplImage* dst){
     cvAbsDiff(frame, bg, dst);
-    cvThreshold(dst, dst, 64.0, 255.0, CV_THRESH_BINARY);
+    cvThreshold(dst, dst, 65.0, 255.0, CV_THRESH_BINARY);
     cvSmooth(dst, dst, CV_MEDIAN, 3);
   }
 
+  inline 
+  void bg_subtract(const cv::Mat& frame, const cv::Mat& bg, 
+                   cv::Mat& dst){
+    dst = cv::abs( frame - bg );
+    cv::threshold(dst, dst, 65.0, 255.0, CV_THRESH_BINARY);
+    cv::medianBlur(dst, dst, 3);
+  }
+  
   inline
   IplImage* bgr2gray(const IplImage* bgr){
     IplImage* gray = cvCreateImage(cvSize(bgr->width, bgr->height),
