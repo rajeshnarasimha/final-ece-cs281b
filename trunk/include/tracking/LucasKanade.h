@@ -13,7 +13,7 @@
 #include <Tracker.h>
 #include <vector>
 
-#include <FASTCVWrapper.h>
+//#include <FASTCVWrapper.h>
 
 enum KeyPointDetector{
   SHITOMASI,
@@ -44,6 +44,10 @@ public:
     return roi;
   }
 
+  cv::Point2f getCentroid(void){
+    return centroid;
+  }
+
 private:
   cv::Rect location;
 
@@ -51,6 +55,8 @@ private:
   cv::Mat prev, current;
   cv::Mat mask;
 
+  //Centroid
+  cv::Point2f centroid;
 
   //Corners
   std::vector<cv::Point2f> prev_corners, corners;
@@ -69,11 +75,16 @@ private:
 
   cv::Size dim;
 
-  FASTCVWrapper fastDetector;
+  double thOutliers;
+
+  //FASTCVWrapper fastDetector;
 
 #ifdef VISUAL
   cv::Mat visual;
 #endif
+
+  void removeOutliers(void);
+  void computeThOutliers(void);
 
 };
 
