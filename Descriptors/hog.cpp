@@ -9,33 +9,12 @@
 
 #include <hog.h>
 #include <cmath>
+#include <utils.h>
 using namespace std;
 using namespace cv;
 
 
 #define PI 3.1416
-
-/*
-vector <double> obtainVectorFromBlock(vector<MatND> block)
-{
-	vector<MatND>  ::const_iterator celdita;
-	vector <double> valuesHistograms;
-	
-	for(celdita=block.begin();celdita!=block.end();++celdita)
-  	{
-		MatND tempCelda =*celdita;
-		//CvHistogram * tempHist=tempCelda.hist;
-		int i=0;
-		while(i<8)
-		{
-			double  tempMagnitud= cvQueryHistValue_1D(tempHist,i);
-			valuesHistograms.push_back(tempMagnitud);
-			i++;
-		}
-	}
-	return valuesHistograms;
-}*/
-
 
 
 
@@ -82,8 +61,32 @@ void buildCellHistogram(const int& x, const int& y,
 
 //dx, dy type CV_32FC1
 
+void hog::prepareDerImages(string pictureName,Mat & dx, Mat & dy)
+{
+	
+  	Mat gray;
+ 
+	IplImage* img = cvLoadImage(pictureName.c_str());
+	imgutils::bgr2gray(img, gray);
+	Sobel(gray,dx,CV_8U,1,0);
+	Sobel(gray,dy,CV_8U,0,1);
+	//CV_8U
+	//Sobel(const Mat& src, Mat& dst, int ddepth, int xorder, int yorder, int ksize=3, double scale=1, double delta=0, int borderType=BORDER_DEFAULT)
+	 /*
+	 IplImage* g_gray = cvCreateImage( cvSize(img->width, img->height), img->depth, 1 );
+	 cvCvtColor( img, g_gray, CV_BGR2GRAY );*/
+	 /*create temp images*/
+	/*
+	df_dx = cvCreateImage(cvGetSize(g_gray),IPL_DEPTH_32F,1);
+	 df_dy = cvCreateImage(cvGetSize(g_gray),IPL_DEPTH_32F,1);*/
+	
+	/* use sobel to find derivatives */
+	/*
+	cvSobel( g_gray, df_dx, 1, 0, 3);
+	cvSobel( g_gray, df_dy, 0, 1, 3);*/
+}
 void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy, 
-                       const int& row, const cv::Size& window,
+                        const cv::Size& window,
                        std::vector< std::vector<cv::MatND> >& cells,
                        const int& bins){
   
@@ -124,8 +127,10 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
 }
 
 
-vector< vector <Mat> > hog::computeBlocks(vector< vector<MatND> >& cells,vector< vector<MatND> >  & blocks,int sizeInput,double e)
+vector< vector <Mat> > hog::computeBlocks(int sizeInput,double e)
 {
+	vector< vector<MatND> > cells;
+	vector< vector<MatND> >  blocks;
 	vector<MatND> block;
   	vector < vector<MatND> > ::const_iterator punto;
 	
@@ -187,7 +192,7 @@ vector< vector <Mat> > hog::computeBlocks(vector< vector<MatND> >& cells,vector<
 float ** hog::integrate( vector<Mat>block, float ** a, int & indice,int trainEx)
 {
 	vector<Mat>::const_iterator matricita;
-	int i=0;
+	//int i=0;
 	for(matricita=block.begin();matricita!=block.end();++matricita)
   	{
 		
