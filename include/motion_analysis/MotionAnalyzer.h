@@ -28,12 +28,9 @@ public:
   ~MotionAnalyzer(void);
 
   void collectCentroidSample( const cv::Point2f& centroid,
-                              const int& nFrame );
+                              const double time );
 
   cv::Point2f guessNextCentroid( void );
-
-  //Compute Curve
-  void computeCurve(void);
 
 private:
   std::ifstream times;
@@ -47,6 +44,9 @@ private:
 
   //Helper functions
   double getTimeFromFrame( const int& nFrame );
+
+  //Compute Curve
+  void computeCurve(void);
 };
 
 #endif
