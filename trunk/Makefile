@@ -127,7 +127,7 @@ testMotion: $(OBJS) test/testMotionAnalyzer.cpp
 	$(LD) -o test/testManal $(OBJS) test/testMotionAnalyzer.o $(LDLIBS)
 
 
-testSVM: test/HocTest.cpp
+testSVM: $(OBJS) test/HocTest.cpp
 	$(CXX) -c -g -ggdb test/HocTest.cpp $(CXXFLAGS) -o test/HocTest.o
 	$(LD) -o test/hogTest $(OBJS) test/HocTest.o $(LDLIBS)
 
