@@ -23,11 +23,12 @@ MotionAnalyzer::~MotionAnalyzer(void){
 }
 
 void MotionAnalyzer::collectCentroidSample( const cv::Point2f& centroid,
-                                            const int& nFrame ){
+                                            const double _time ){
   // motion_t tup( getTimeFromFrame(nFrame), centroid );
   // trajectory.push_back(tup);
-  time.push_back( getTimeFromFrame(nFrame) );
+  time.push_back( _time );
   points.push_back(centroid);
+  computeCurve(); //Update the curve
 }
 
 double MotionAnalyzer::getTimeFromFrame( const int& nFrame ){
@@ -35,6 +36,5 @@ double MotionAnalyzer::getTimeFromFrame( const int& nFrame ){
 }
 
 void MotionAnalyzer::computeCurve(void){
-  cv::Mat trajectory(points);
-  cv::approxPolyDP(curve, points,0.10,true);
+
 }
