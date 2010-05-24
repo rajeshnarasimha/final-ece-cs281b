@@ -74,8 +74,8 @@ LucasKanade::LucasKanade( const cv::Mat& frame1,
   std::cout << "<<LK>> Corners Found: " << prev_corners.size() << std::endl;
 #endif
 
-  centroid.x = (roi.width  /2) + roi.x;
-  centroid.y = (roi.height /2) + roi.y;
+  centroid.x = (roi.width  / 2.0f) + static_cast<float>( roi.x );
+  centroid.y = (roi.height / 2.0f) + static_cast<float>( roi.y );
 
   //computeThOutliers();
 
@@ -130,8 +130,8 @@ CvRect LucasKanade::track( const cv::Mat& frame ){
     (*it_next).y += roi.y;
   }
 
-  centroid.x = (roi.width  /2) + roi.x;
-  centroid.y = (roi.height /2) + roi.y;
+  centroid.x = (roi.width  / 2.0f) + static_cast<float>( roi.x );
+  centroid.y = (roi.height / 2.0f) + static_cast<float>( roi.y );
 
   //Remove Outliers
   //removeOutliers();
