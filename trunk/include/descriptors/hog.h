@@ -21,8 +21,12 @@ namespace hog{
                     std::vector< std::vector<cv::MatND> >& cells, 
                     const int& bins=9);
 
-  void computeBlocks(std::vector< std::vector<cv::MatND> >& cells,std::vector< std::vector<cv::MatND> >  & blocks);
-                     
+ std::vector< std::vector <cv::Mat> > computeBlocks(std::vector< std::vector<cv::MatND> >& cells,std::vector< std::vector<cv::MatND> >  & blocks,int sizeInput,double e);
+ double calculateL2Norm(cv::MatND matricita);  
+ std::vector <cv::Mat> normalizeBlock(std::vector <cv::MatND>   block, double e);
+ float ** integrate( std::vector<cv::Mat>block, float ** a, int & indice,int trainEx);
+ float ** prepareTData(std::vector < std::vector<cv::Mat> >  normalizedBlocks,float **trainingData,int numTrain,int size);
+           
 }
 
 
