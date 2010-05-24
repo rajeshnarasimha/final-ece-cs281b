@@ -65,11 +65,20 @@ void hog::prepareDerImages(string pictureName,Mat & dx, Mat & dy)
 {
 	
   	Mat gray;
- 
-	IplImage* img = cvLoadImage(pictureName.c_str());
+        Mat img;
+
+        img = imread(pictureName);
+
+        if( !img.data ) {
+          cerr << "Cannot open File" << endl;
+          return;
+        }
+
 	imgutils::bgr2gray(img, gray);
-	Sobel(gray,dx,CV_8U,1,0);
-	Sobel(gray,dy,CV_8U,0,1);
+
+	Sobel(gray, dx, CV_8U, 1, 0);
+	Sobel(gray, dy, CV_8U, 0, 1);
+
 	//CV_8U
 	//Sobel(const Mat& src, Mat& dst, int ddepth, int xorder, int yorder, int ksize=3, double scale=1, double delta=0, int borderType=BORDER_DEFAULT)
 	 /*
@@ -86,7 +95,7 @@ void hog::prepareDerImages(string pictureName,Mat & dx, Mat & dy)
 	cvSobel( g_gray, df_dy, 0, 1, 3);*/
 }
 void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy, 
-                        const cv::Size& window,
+                       const cv::Size& window,
                        std::vector< std::vector<cv::MatND> >& cells,
                        const int& bins){
   
@@ -94,8 +103,14 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
   cv::Mat angle = cv::Mat::zeros(dx.rows, dx.cols, CV_32FC1);
   cv::Mat magn  = cv::Mat::zeros(dx.rows, dx.cols, CV_32FC1);
 
-  magn  = dx.mul(dx) + dy.mul(dy);
-  angle = dy / dx;
+  cv::Mat dx32f;
+  dx.convertTo(dx32f, CV_32FC1);
+
+  cv::Mat dy32f;
+  dy.convertTo(dy32f, CV_32FC1);
+
+  magn  = dx32f.mul(dx32f) + dy32f.mul(dy32f);
+  angle = dy32f / dx32f;
 
   for( int i = 0; i < magn.cols; i++){
     for( int j = 0; j < magn.rows; j++){
@@ -109,10 +124,10 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
 
   //Create Cells
   int sizes[] = { bins };
-  for( int y = 0; y < angle.rows; y += window.height){
+  for( int y = 0; y + window.height < angle.rows; y += window.height){
     std::vector<cv::MatND> histRow;
     
-    for( int x = 0; x < angle.cols; x += window.width){
+    for( int x = 0; x + window.width < angle.cols; x += window.width){
       cv::MatND histogram(1, sizes, CV_32F, cv::Scalar(0.0) );
       buildCellHistogram(x,y,angle,magn,histogram,bins,window);
       histRow.push_back( histogram );

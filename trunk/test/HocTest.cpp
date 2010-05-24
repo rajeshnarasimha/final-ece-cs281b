@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 	//computeBlocks(sizeInput,e);
 	//cout<<"made it";
 	Mat dx,dy;
-	prepareDerImages("per00000.ppm", dx,dy);
+	prepareDerImages("./per00001.ppm", dx,dy);
 	Size windowCell(6,6);
 	computeCells(dx,dy,windowCell,cells);
 	
