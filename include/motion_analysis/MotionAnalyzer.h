@@ -50,6 +50,7 @@ private:
 
   //Compute Curve
   void computeCurve(void);
+  void computeVelocities(void);
 };
 
 #endif
