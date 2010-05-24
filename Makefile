@@ -129,7 +129,7 @@ testMotion: $(OBJS) test/testMotionAnalyzer.cpp
 
 testSVM: test/HocTest.cpp
 	$(CXX) -c -g -ggdb test/HocTest.cpp $(CXXFLAGS) -o test/HocTest.o
-	$(LD) -o test/hogTest test/HocTest.o $(LDLIBS)
+	$(LD) -o test/hogTest $(OBJS) test/HocTest.o $(LDLIBS)
 
 clean:
 	rm -rf $(OBJDIR_DEF) $(OBJDIR_DEB)
