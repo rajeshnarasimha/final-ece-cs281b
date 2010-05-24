@@ -36,7 +36,7 @@ double MotionAnalyzer::getTimeFromFrame( const int& nFrame ){
 void MotionAnalyzer::computeVelocities(void){
   //Call a curvefitting
   std::vector<cv::Point2f>::const_iterator p;
-  std::vector<cv::Point2f>::const_iterator t;
+  std::vector<double>::const_iterator t;
   double dt(0.0);
   cv::Point2f dp;
   for( p = points.begin(), t = time.begin();
