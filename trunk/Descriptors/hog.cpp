@@ -9,6 +9,9 @@
 
 #include <hog.h>
 #include <cmath>
+using namespace std;
+using namespace cv;
+
 
 #define PI 3.1416
 
@@ -18,6 +21,7 @@ void buildCellHistogram(const int& x, const int& y,
                         const cv::Size& window);
 
 //dx, dy type CV_32FC1
+
 void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy, 
                        const int& row, const cv::Size& window,
                        std::vector< std::vector<cv::MatND> >& cells,
@@ -54,7 +58,55 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
     cells.push_back(histRow);
   }
   
+
+
+	
 }
+
+void hog::computeBlocks(vector< vector<MatND> >& cells,vector< vector<MatND> >  & blocks)
+{
+	vector<MatND> block;
+  	vector < vector<MatND> > ::const_iterator punto;
+	
+	//int i=0;
+	for(punto=cells.begin();punto!=cells.end();punto=punto+3)
+  	{
+	  /*obtenemos 3 renglones de celdas consegutivos*/
+	const  vector<MatND> & primerRenglon=*punto;
+	 const vector<MatND> & segundoRenglon=*(punto+1);
+	 const vector<MatND> & tercerRenglon=*(punto+2);
+	  unsigned int iterador=0;
+	  /*Armaremos el bloque  tomando 3 elementos consecutivos de cada renglon, y
+	   * armando asi el bloque de 3X3, despues avanzaremos y armaremos otro 
+	   * bloque*/
+	   
+	   while(iterador+2<primerRenglon.size()||iterador+2<segundoRenglon.size()||iterador+2<tercerRenglon.size())
+	  {
+		  block.push_back(primerRenglon.at(iterador));
+		  block.push_back(segundoRenglon.at(iterador));
+		  block.push_back(tercerRenglon.at(iterador));
+		  
+		  block.push_back(primerRenglon.at(iterador+1));
+		  block.push_back(segundoRenglon.at(iterador+1));
+		  block.push_back(tercerRenglon.at(iterador+1));
+		  
+		  block.push_back(primerRenglon.at(iterador+2));
+		  block.push_back(segundoRenglon.at(iterador+2));
+		  block.push_back(tercerRenglon.at(iterador+2));
+		  
+		  //cout<<"size block inside "<<block.size()<<endl;
+		  blocks.push_back(block);
+		  //cout<<"one block"<<block.size();
+		  block=vector<MatND>();
+		  iterador+=3;
+		  
+	  }
+	   
+	 // i++;
+	  
+  }
+  
+ }
 
 void buildCellHistogram(const int& x, const int& y,
                         const cv::Mat& angle, const cv::Mat& magn,

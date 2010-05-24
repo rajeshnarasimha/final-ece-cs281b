@@ -21,7 +21,7 @@ namespace hog{
                     std::vector< std::vector<cv::MatND> >& cells, 
                     const int& bins=9);
 
-  void computeBlocks(std::vector< std::vector<cv::MatND> >& cells,
+  void computeBlocks(std::vector< std::vector<cv::MatND> >& cells,std::vector< std::vector<cv::MatND> >  & blocks);
                      
 }
 
