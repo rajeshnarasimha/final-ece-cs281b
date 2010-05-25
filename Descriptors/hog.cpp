@@ -10,11 +10,30 @@
 #include <hog.h>
 #include <cmath>
 #include <utils.h>
+//#include <iostream>
+//#include <fstream>
+#include <iostream>
+#include <fstream>
 using namespace std;
 using namespace cv;
 
 
 #define PI 3.1416
+void hog::write(float **trainingData,int size, int numTrain,string nameFile)
+{
+	ofstream myfile;
+  	myfile.open (nameFile.c_str());
+  	
+  	
+	for(int i=0;i<size;i++)
+	{
+		//cout<<"write "<<trainingData[numTrain][i];
+		myfile <<trainingData[numTrain][i]<<endl;
+		//trainingData[numTrain][size];	
+	}
+	myfile.close();
+	
+}
 
 
 
@@ -35,7 +54,13 @@ vector <Mat>  hog::normalizeBlock(vector <MatND>   block, double e)
 	for(celdita=block.begin();celdita!=block.end();++celdita)
   	{
 		Mat h =Mat(*celdita);
-		
+		/*for(int i=0;i<6;i++)
+		{	
+			for(int j=0;j<6;j++)
+			{
+				//cout<<"value before norm: "<<h.at<float>(i,j);
+			}
+		}*/
 		h=h*total;
 		normBlock.push_back(h);
 		
@@ -124,27 +149,32 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
 
   //Create Cells
   int sizes[] = { bins };
-  for( int y = 0; y + window.height < angle.rows; y += window.height){
+  for( int y = 0; y + window.height < angle.rows; y += window.height)
+  {
     std::vector<cv::MatND> histRow;
     
-    for( int x = 0; x + window.width < angle.cols; x += window.width){
+    for( int x = 0; x + window.width < angle.cols; x += window.width)
+    {
       cv::MatND histogram(1, sizes, CV_32F, cv::Scalar(0.0) );
       buildCellHistogram(x,y,angle,magn,histogram,bins,window);
-      histRow.push_back( histogram );
-    }
+      for(int m=0;m<9;m++)
+      {		cout<<"magnitud histograma "<<fixed<<histogram.at<float>(m)<<endl;
+      	
+	  }
+	  histRow.push_back( histogram );
     
-    cells.push_back(histRow);
+    //cells.push_back(histRow);
   }
-  
+  cells.push_back(histRow);
 
-
+}
 	
 }
 
 
-vector< vector <Mat> > hog::computeBlocks(int sizeInput,double e)
+vector< vector <Mat> > hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > cells)
 {
-	vector< vector<MatND> > cells;
+	
 	vector< vector<MatND> >  blocks;
 	vector<MatND> block;
   	vector < vector<MatND> > ::const_iterator punto;
@@ -197,28 +227,39 @@ vector< vector <Mat> > hog::computeBlocks(int sizeInput,double e)
   	 //normalizedBlocks.push_back(normValues);
   }
 	
-	int totalSize=normalizedBlocks.size()*normValues.size();
- 
-  sizeInput=totalSize+192;
+	
+	cout<<"norm size"<<normalizedBlocks.size()<<" block "<<normValues.size();
+	int numCeldas=normalizedBlocks.size()*normValues.size();
+	/*asumiendo que cada celda es de 6*6*/
+	int numPixeles=numCeldas*36;
+	cout<<"num pixeles "<<numPixeles;
+ 	
+  sizeInput=numPixeles;
   return normalizedBlocks;
   
  }
 
-float ** hog::integrate( vector<Mat>block, float ** a, int & indice,int trainEx)
+float ** hog::integrate( vector<Mat>block, float ** a, int & indice,int trainEx, int size)
 {
 	vector<Mat>::const_iterator matricita;
 	//int i=0;
+	
 	for(matricita=block.begin();matricita!=block.end();++matricita)
   	{
 		
 		/*assumiendo que la matriz esta hecha de 6*6*/
+		a[trainEx] = new float[size];
 		for(int j=0;j<6;j++)
 		{
 			for(int k=0;k<6;k++)
 			{
+				if(indice>size)
+					return a;
 				//Mat temp=*matricita;
 				//temp.at<float>(k,j);
 				a[trainEx][indice]=matricita->at<float>(j,k);
+			
+				//cout<<"value"<<matricita->at<float>(j,k);
 				indice++;
 		
 			}
@@ -230,13 +271,17 @@ float ** hog::integrate( vector<Mat>block, float ** a, int & indice,int trainEx)
 float ** hog::prepareTData(vector < vector<Mat> >  normalizedBlocks,float **trainingData,int numTrain,int size)
 {
 	trainingData[numTrain] = new float[size];
+	
 	vector< vector<Mat> > ::const_iterator parteEjemplo;
 	int indice=0;
 	for(parteEjemplo=normalizedBlocks.begin();parteEjemplo!=normalizedBlocks.end();++parteEjemplo)
   	{
-		  integrate (*parteEjemplo,trainingData,indice,0);
+		 trainingData=integrate (*parteEjemplo,trainingData,indice,0,size);
+		 //cout<<"indice out: "<<indice<<" size: "<<size<<endl;
+		 
 	  	  indice++;
-	 
+	 	if(indice>size)
+	 		return trainingData;
   	}
   	return trainingData;
 }
@@ -259,6 +304,7 @@ void buildCellHistogram(const int& x, const int& y,
       int angleAt = static_cast<int>( W.at<float>(j,i) );
       bin = angleAt == 180 ? bins - 1 : angleAt % 180 / step;
       histogram.at<int>(bin) += M.at<float>(j,i); 
+      //cout<<"magnitud histograma "<<histogram.at<int>(bin); 
     }
   }
 
