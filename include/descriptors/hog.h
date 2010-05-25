@@ -26,6 +26,8 @@ void write(float **trainingData,int size, int numTrain,std::string nameFile);
  std::vector< std::vector <cv::Mat> > computeBlocks(int & sizeInput,double e,std::vector< std::vector<cv::MatND> > cells);
  
  double calculateL2Norm(cv::MatND matricita);
+ 
+ float ** trainEx(std::string fileName,int trainEx,float **trainingData);
   
  void prepareDerImages(std::string pictureName,cv::Mat & dx, cv::Mat & dy); 
  
