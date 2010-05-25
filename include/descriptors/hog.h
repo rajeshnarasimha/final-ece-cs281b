@@ -27,7 +27,7 @@ void write(float **trainingData,int size, int numTrain,std::string nameFile);
  
  double calculateL2Norm(cv::MatND matricita);
  
- float ** trainEx(std::string fileName,int trainEx,float **trainingData,std::string nameFileWrite);
+ void trainEx(std::string fileName,int trainEx,float **trainingData,std::string nameFileWrite,int & size);
   
  void prepareDerImages(std::string pictureName,cv::Mat & dx, cv::Mat & dy); 
  
