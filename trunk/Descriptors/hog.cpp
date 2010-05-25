@@ -119,6 +119,26 @@ void hog::prepareDerImages(string pictureName,Mat & dx, Mat & dy)
 	cvSobel( g_gray, df_dx, 1, 0, 3);
 	cvSobel( g_gray, df_dy, 0, 1, 3);*/
 }
+float ** hog::trainEx(string fileName,int trainEx,float **trainingData)
+{
+	
+	Mat dx,dy;
+	vector< vector<MatND> >cells;
+	vector< vector <Mat> > blocks;
+	//float **trainingData=new float*[3];
+	int sizeInput=0;
+	double e=0.0002;
+	
+	prepareDerImages(fileName, dx,dy);
+	Size windowCell(6,6);
+	computeCells(dx,dy,windowCell,cells);
+	blocks=computeBlocks(sizeInput, e,cells);
+	cout<<"size out "<<sizeInput;
+	trainingData=prepareTData(blocks,trainingData,trainEx,sizeInput);
+	write(trainingData,sizeInput,trainEx,"ex3.txt");
+	return trainingData;
+	
+}
 void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy, 
                        const cv::Size& window,
                        std::vector< std::vector<cv::MatND> >& cells,
