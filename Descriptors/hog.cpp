@@ -119,7 +119,7 @@ void hog::prepareDerImages(string pictureName,Mat & dx, Mat & dy)
 	cvSobel( g_gray, df_dx, 1, 0, 3);
 	cvSobel( g_gray, df_dy, 0, 1, 3);*/
 }
-float ** hog::trainEx(string fileName,int trainEx,float **trainingData)
+float ** hog::trainEx(string fileName,int trainEx,float **trainingData,string nameFileWrite)
 {
 	
 	Mat dx,dy;
@@ -135,7 +135,7 @@ float ** hog::trainEx(string fileName,int trainEx,float **trainingData)
 	blocks=computeBlocks(sizeInput, e,cells);
 	cout<<"size out "<<sizeInput;
 	trainingData=prepareTData(blocks,trainingData,trainEx,sizeInput);
-	write(trainingData,sizeInput,trainEx,"ex3.txt");
+	write(trainingData,sizeInput,trainEx,nameFileWrite);
 	return trainingData;
 	
 }
@@ -296,7 +296,7 @@ float ** hog::prepareTData(vector < vector<Mat> >  normalizedBlocks,float **trai
 	int indice=0;
 	for(parteEjemplo=normalizedBlocks.begin();parteEjemplo!=normalizedBlocks.end();++parteEjemplo)
   	{
-		 trainingData=integrate (*parteEjemplo,trainingData,indice,0,size);
+		 trainingData=integrate (*parteEjemplo,trainingData,indice,numTrain,size);
 		 //cout<<"indice out: "<<indice<<" size: "<<size<<endl;
 		 
 	  	  indice++;
