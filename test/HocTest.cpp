@@ -40,12 +40,12 @@ int main(int argc, char** argv)
 		
 	}*/
 
-	/*
+	
 	blocks=computeBlocks(sizeInput, e,cells);
 	cout<<"size out "<<sizeInput;
 	trainingData=prepareTData(blocks,trainingData,0,sizeInput);
 	write(trainingData,sizeInput,0,"ex2.txt");
-	// write(trainingData,size,0,"ex2.txt");*/
+	/* write(trainingData,size,0,"ex2.txt");*/
                      
 	cout<<"made it here";
 	/*int size=0,size2,size3;
