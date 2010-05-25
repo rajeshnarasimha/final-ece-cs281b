@@ -169,11 +169,11 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
 
   //Create Cells
   int sizes[] = { bins };
-  for( int y = 0; y + window.height < angle.rows; y += window.height)
+  for( int y = 0; (y + window.height - 1) < angle.rows; y += window.height)
   {
     std::vector<cv::MatND> histRow;
     
-    for( int x = 0; x + window.width < angle.cols; x += window.width)
+    for( int x = 0; (x + window.width - 1) < angle.cols; x += window.width)
     {
       cv::MatND histogram(1, sizes, CV_32F, cv::Scalar(0.0) );
       buildCellHistogram(x,y,angle,magn,histogram,bins,window);
@@ -321,7 +321,7 @@ void buildCellHistogram(const int& x, const int& y,
 
   for( int i = 0; i < W.cols; i++){
     for( int j = 0; j < W.rows; j++){
-      int angleAt = static_cast<int>( W.at<float>(j,i) );
+      int angleAt = static_cast<int>( ceilf(W.at<float>(j,i)) );
       bin = angleAt == 180 ? bins - 1 : angleAt % 180 / step;
       histogram.at<float>(bin) += M.at<float>(j,i); 
       //cout<<"BIN "<<bin<<endl;
