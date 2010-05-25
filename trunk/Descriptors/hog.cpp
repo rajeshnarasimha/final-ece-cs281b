@@ -139,8 +139,8 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
 
   for( int i = 0; i < magn.cols; i++){
     for( int j = 0; j < magn.rows; j++){
-      magn.at<float>(j,i)  = sqrt(magn.at<float>(j,i));
-      angle.at<float>(j,i) = atan(angle.at<float>(j,i))*180/PI;
+      magn.at<float>(j,i)  = sqrtf(magn.at<float>(j,i));
+      angle.at<float>(j,i) = atanf(angle.at<float>(j,i))*180/PI;
       angle.at<float>(j,i) = angle.at<float>(j,i) < 0 ? 
         angle.at<float>(j,i) + 180 :
         angle.at<float>(j,i);
@@ -303,9 +303,11 @@ void buildCellHistogram(const int& x, const int& y,
     for( int j = 0; j < W.rows; j++){
       int angleAt = static_cast<int>( W.at<float>(j,i) );
       bin = angleAt == 180 ? bins - 1 : angleAt % 180 / step;
-      histogram.at<int>(bin) += M.at<float>(j,i); 
-      //cout<<"magnitud histograma "<<histogram.at<int>(bin); 
+      histogram.at<float>(bin) += M.at<float>(j,i); 
+      //cout<<"BIN "<<bin<<endl;
+     // cout<<"magnitud histograma "<<histogram.at<int>(bin); 
     }
   }
+  
 
 }
