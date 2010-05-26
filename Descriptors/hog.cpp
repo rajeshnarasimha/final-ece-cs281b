@@ -133,9 +133,9 @@ void hog::trainEx(string fileName,int trainEx,float **trainingData,string nameFi
 	Size windowCell(8,8);
 	computeCells(dx,dy,windowCell,cells);
 	blocks=computeBlocks(sizeInput, e,cells);
-	cout<<"size out "<<sizeInput;
+	//cout<<"size out "<<sizeInput;
 	trainingData=prepareTData(blocks,trainingData,trainEx,sizeInput);
-	write(trainingData,sizeInput,trainEx,nameFileWrite);
+	//write(trainingData,sizeInput,trainEx,nameFileWrite);
 	//return trainingData;
 	
 }
@@ -178,7 +178,7 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
       cv::MatND histogram(1, sizes, CV_32F, cv::Scalar(0.0) );
       buildCellHistogram(x,y,angle,magn,histogram,bins,window);
       for(int m=0;m<9;m++)
-      {		cout<<"magnitud histograma "<<fixed<<histogram.at<float>(m)<<endl;
+      {		//cout<<"magnitud histograma "<<fixed<<histogram.at<float>(m)<<endl;
       	
 	  }
 	  histRow.push_back( histogram );
@@ -191,7 +191,42 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
 	
 }
 
-
+void hog::prepareTrainData(int numTrainExample,string fileName, int & size,float **trainingData)
+{
+	//int size;
+	//trainingData=new float*[numTrainExample];
+	
+	
+	
+	 trainingData=new float*[numTrainExample];
+	for(int i=0;i<numTrainExample;i++)
+	{
+		
+		string newFileName;
+		string outputName="Mex";
+		newFileName.append(fileName);
+		if(i<10)
+			newFileName.append("00");
+		else if(i<100)
+				newFileName.append("0");
+		char num [3];
+  		sprintf (num, "%d",i);
+  		outputName.append(num);
+  		outputName.append(".txt");
+  		newFileName.append(num);
+  		newFileName.append(".ppm");
+  		//cout<<"Name of file "<<newFileName<<endl;
+  		/*if(i==0)
+  		newFileName="per00008.ppm";
+  		else if(i==1)
+  			newFileName="per00001.ppm";
+  		else if(i==2)
+  			newFileName="per00000.ppm";*/
+  		
+  			
+  		trainEx(newFileName,i,trainingData,outputName,size);
+  	}
+  }
 vector< vector <Mat> > hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > cells)
 {
 	
@@ -200,41 +235,41 @@ vector< vector <Mat> > hog::computeBlocks(int & sizeInput,double e,vector< vecto
   	vector < vector<MatND> > ::const_iterator punto;
 	
 	//int i=0;
-	for(punto=cells.begin();punto!=cells.end();punto=punto+3)
+	for(punto=cells.begin();punto+2<cells.end();punto=punto+3)
   	{
 	  /*obtenemos 3 renglones de celdas consegutivos*/
-	const  vector<MatND> & primerRenglon=*punto;
-	 const vector<MatND> & segundoRenglon=*(punto+1);
-	 const vector<MatND> & tercerRenglon=*(punto+2);
-	  unsigned int iterador=0;
-	  /*Armaremos el bloque  tomando 3 elementos consecutivos de cada renglon, y
-	   * armando asi el bloque de 3X3, despues avanzaremos y armaremos otro 
-	   * bloque*/
-	   
-	   while(iterador+2<primerRenglon.size()||iterador+2<segundoRenglon.size()||iterador+2<tercerRenglon.size())
-	  {
-		  block.push_back(primerRenglon.at(iterador));
-		  block.push_back(segundoRenglon.at(iterador));
-		  block.push_back(tercerRenglon.at(iterador));
+	  
+		const  vector<MatND> & primerRenglon=*punto;
+	 	const vector<MatND> & segundoRenglon=*(punto+1);
+	 	const vector<MatND> & tercerRenglon=*(punto+2);
+	  	unsigned int iterador=0;
+	  	/*Armaremos el bloque  tomando 3 elementos consecutivos de cada renglon, y
+	   	* armando asi el bloque de 3X3, despues avanzaremos y armaremos otro 
+	   	* bloque*/
+	   	//&&iterador+2<segundoRenglon.size()&&iterador+2<tercerRenglon.size()
+	   	while(iterador+2<primerRenglon.size() )
+	  	{
+			block.push_back(primerRenglon.at(iterador));
+		  	block.push_back(segundoRenglon.at(iterador));
+		    block.push_back(tercerRenglon.at(iterador));
+		  	block.push_back(primerRenglon.at(iterador+1));
+		  	block.push_back(segundoRenglon.at(iterador+1));
+		  	block.push_back(tercerRenglon.at(iterador+1));
 		  
-		  block.push_back(primerRenglon.at(iterador+1));
-		  block.push_back(segundoRenglon.at(iterador+1));
-		  block.push_back(tercerRenglon.at(iterador+1));
+		  	block.push_back(primerRenglon.at(iterador+2));
+		  	block.push_back(segundoRenglon.at(iterador+2));
+		  	block.push_back(tercerRenglon.at(iterador+2));
 		  
-		  block.push_back(primerRenglon.at(iterador+2));
-		  block.push_back(segundoRenglon.at(iterador+2));
-		  block.push_back(tercerRenglon.at(iterador+2));
+		 	//cout<<"size block inside "<<block.size()<<endl;
+		  	blocks.push_back(block);
+		  	//cout<<"one block"<<block.size();
+		  	block=vector<MatND>();
+		  	iterador+=3;
 		  
-		  //cout<<"size block inside "<<block.size()<<endl;
-		  blocks.push_back(block);
-		  //cout<<"one block"<<block.size();
-		  block=vector<MatND>();
-		  iterador+=3;
-		  
-	  }
+	  	}
 	   
 	 // i++;
-	  
+  	
   }
    vector< vector <Mat> >  normalizedBlocks;
    vector <Mat> normValues;
@@ -248,11 +283,11 @@ vector< vector <Mat> > hog::computeBlocks(int & sizeInput,double e,vector< vecto
   }
 	
 	
-	cout<<"norm size"<<normalizedBlocks.size()<<" block "<<normValues.size();
+	//cout<<"norm size"<<normalizedBlocks.size()<<" block "<<normValues.size();
 	int numCeldas=normalizedBlocks.size()*normValues.size();
 	/*asumiendo que cada celda es de 6*6*/
 	int numPixeles=numCeldas*36;
-	cout<<"num pixeles "<<numPixeles;
+	//cout<<"num pixeles "<<numPixeles;
  	
   sizeInput=numPixeles;
   return normalizedBlocks;
