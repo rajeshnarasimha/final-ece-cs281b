@@ -34,6 +34,7 @@ void write(float **trainingData,int size, int numTrain,std::string nameFile);
  std::vector <cv::Mat> normalizeBlock(std::vector <cv::MatND>   block, double e);
  
  float ** integrate( std::vector<cv::Mat>block, float  ** a, int & indice,int trainEx,int size);
+ void prepareTrainData(int numTrainExample,std::string fileName, int & size,float **trainingData);
  
  float ** prepareTData(std::vector < std::vector<cv::Mat> >  normalizedBlocks,float **trainingData,int numTrain,int size);
            
