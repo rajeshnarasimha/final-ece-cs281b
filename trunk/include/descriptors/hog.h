@@ -23,20 +23,23 @@ namespace hog{
                     const int& bins=9);
                     
 void write(float **trainingData,int size, int numTrain,std::string nameFile);
- std::vector< std::vector <cv::Mat> > computeBlocks(int & sizeInput,double e,std::vector< std::vector<cv::MatND> > cells);
+ std::vector< std::vector <cv::Mat> > computeBlocks(int & sizeInput,double e,std::vector< std::vector<cv::MatND> > cells,int windowSize);
  
  double calculateL2Norm(cv::MatND matricita);
  
- void trainEx(std::string fileName,int trainEx,float **trainingData,std::string nameFileWrite,int & size);
+ void trainEx(std::string fileName,int trainEx,float **trainingData,std::string nameFileWrite,int & size,int windowSize,int blockSize);
   
  void prepareDerImages(std::string pictureName,cv::Mat & dx, cv::Mat & dy); 
  
  std::vector <cv::Mat> normalizeBlock(std::vector <cv::MatND>   block, double e);
  
- float ** integrate( std::vector<cv::Mat>block, float  ** a, int & indice,int trainEx,int size);
- void prepareTrainData(int numTrainExample,std::string fileName, int & size,float **trainingData);
+ float ** integrate( std::vector<cv::Mat>block, float  ** a, int & indice,int trainEx,int size,int windowSize);
+ void prepareTrainData(int numTrainExample,std::string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock);
  
- float ** prepareTData(std::vector < std::vector<cv::Mat> >  normalizedBlocks,float **trainingData,int numTrain,int size);
+ 
+std::vector< std::vector <cv::Mat> >  computeBlocks(int & sizeInput,double e,std::vector< std::vector<cv::MatND> > rowsOfCells,int windowSize,int blockSize);
+ 
+ float ** prepareTData(std::vector < std::vector<cv::Mat> >  normalizedBlocks,float **trainingData,int numTrain,int size,int windowSize);
            
 }
 
