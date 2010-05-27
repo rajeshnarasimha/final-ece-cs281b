@@ -37,6 +37,7 @@ void hog::write(float **trainingData,int size, int numTrain,string nameFile)
 
 
 
+
 vector <Mat>  hog::normalizeBlock(vector <MatND>   block, double e)
 {
 	vector<MatND>  ::const_iterator celdita;
@@ -119,7 +120,7 @@ void hog::prepareDerImages(string pictureName,Mat & dx, Mat & dy)
 	cvSobel( g_gray, df_dx, 1, 0, 3);
 	cvSobel( g_gray, df_dy, 0, 1, 3);*/
 }
-void hog::trainEx(string fileName,int trainEx,float **trainingData,string nameFileWrite,int & sizeInput)
+void hog::trainEx(string fileName,int trainEx,float **trainingData,string nameFileWrite,int & sizeInput,int windowSize,int blockSize)
 {
 	
 	Mat dx,dy;
@@ -130,12 +131,16 @@ void hog::trainEx(string fileName,int trainEx,float **trainingData,string nameFi
 	double e=0.0002;
 	
 	prepareDerImages(fileName, dx,dy);
-	Size windowCell(8,8);
+	Size windowCell(windowSize,windowSize);
 	computeCells(dx,dy,windowCell,cells);
-	blocks=computeBlocks(sizeInput, e,cells);
+	//blocks=computeBlocks(sizeInput, e,cells,windowSize,2);
+	blocks=computeBlocks(sizeInput, e,cells,windowSize,4);
 	//cout<<"size out "<<sizeInput;
-	trainingData=prepareTData(blocks,trainingData,trainEx,sizeInput);
-	//write(trainingData,sizeInput,trainEx,nameFileWrite);
+	//:computeBlocks(int & sizeInput,double e,vector< vector<MatND> > rowsOfCells,int windowSize,int blockSize)
+	//blocks=computeBlocks(sizeInput, e,cells,windowSize);
+	//cout<<"size out "<<sizeInput;
+	trainingData=prepareTData(blocks,trainingData,trainEx,sizeInput,windowSize);
+	write(trainingData,sizeInput,trainEx,nameFileWrite);
 	//return trainingData;
 	
 }
@@ -177,10 +182,10 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
     {
       cv::MatND histogram(1, sizes, CV_32F, cv::Scalar(0.0) );
       buildCellHistogram(x,y,angle,magn,histogram,bins,window);
-      for(int m=0;m<9;m++)
+     /* for(int m=0;m<9;m++)
       {		//cout<<"magnitud histograma "<<fixed<<histogram.at<float>(m)<<endl;
       	
-	  }
+	  }*/
 	  histRow.push_back( histogram );
     
     //cells.push_back(histRow);
@@ -191,7 +196,7 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
 	
 }
 
-void hog::prepareTrainData(int numTrainExample,string fileName, int & size,float **trainingData)
+void hog::prepareTrainData(int numTrainExample,string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock)
 {
 	//int size;
 	//trainingData=new float*[numTrainExample];
@@ -203,7 +208,7 @@ void hog::prepareTrainData(int numTrainExample,string fileName, int & size,float
 	{
 		
 		string newFileName;
-		string outputName="Mex";
+		string outputName="gann ";
 		newFileName.append(fileName);
 		if(i<10)
 			newFileName.append("00");
@@ -223,11 +228,76 @@ void hog::prepareTrainData(int numTrainExample,string fileName, int & size,float
   		else if(i==2)
   			newFileName="per00000.ppm";*/
   		
+  		cout<<"this is the i of Training"<<i<<endl;	
   			
-  		trainEx(newFileName,i,trainingData,outputName,size);
+  		trainEx(newFileName,i,trainingData,outputName,size,sizeCeldas,sizeBlock);
+  		//trainEx("per00980.ppm",i,trainingData,outputName,size,sizeCells,sizeBlocks);
   	}
   }
-vector< vector <Mat> > hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > cells)
+  
+  
+vector< vector <Mat> >  hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > rowsOfCells,int windowSize,int blockSize)
+  {
+	  int widthGroupOfCells=rowsOfCells.at(0).size();
+	  int heigthGroupOfCells=rowsOfCells.size();
+	  int totalOfBlocks=widthGroupOfCells/blockSize;
+	  int tempValue=heigthGroupOfCells/blockSize;
+	  totalOfBlocks=totalOfBlocks*tempValue;
+	  vector< vector<MatND> > block;
+	  vector< vector<MatND> > rowOfBlocks;
+	  vector<MatND> listOfBlocks[widthGroupOfCells/blockSize][(heigthGroupOfCells/blockSize)+1];
+	  int numRow=0;
+	  //cout<<"renlones "<<widthGroupOfCells/blockSize<<endl;
+	  //cout<<"columnas"<<heigthGroupOfCells/blockSize<<endl;
+	  for(int i=0;i<widthGroupOfCells/blockSize;i++)
+	  {
+		  for(int j=0;j<heigthGroupOfCells/blockSize;j++)
+		  {
+			  vector<MatND> tempVector;
+			  listOfBlocks[i][j]=tempVector;
+		  }
+	  }
+	  
+	  while(numRow<rowsOfCells.size())
+	  {
+		  vector<MatND> rowCell=rowsOfCells.at(numRow);
+	  	  int i=0;
+	  	  
+	  	  while(i<rowCell.size())
+	  	  {
+			 MatND cell=rowCell.at(i);
+			  
+			  int numRowBlock=i/blockSize;
+			   int numColBlock=numRow/blockSize;
+			   //cout<<"columna "<<numColBlock<<"renglon: "<<numRowBlock<<endl;
+			listOfBlocks[numRowBlock][numColBlock].push_back(cell);
+			   i++;
+		  }
+		 
+		  numRow++;
+		 }
+	
+	vector< vector <Mat> >  normalizedBlocks;
+   vector <Mat> normValues;
+   
+   for(int k=0;k<(widthGroupOfCells/blockSize);k++)
+   {
+	   for(int j=0;j<(widthGroupOfCells/blockSize);j++)
+	   {
+		   
+		   normValues=normalizeBlock(listOfBlocks[k][j], e);
+		   normalizedBlocks.push_back(normValues);
+	   }
+   }
+   //int numCeldas=normalizedBlocks.size()*normValues.size();
+  // int numPixeles=numCeldas*windowSize*windowSize;
+  // sizeInput=numPixeles;
+   sizeInput=4099;
+   return normalizedBlocks;
+		 
+  		
+  	}
+vector< vector <Mat> > hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > cells,int windowSize)
 {
 	
 	vector< vector<MatND> >  blocks;
@@ -286,15 +356,15 @@ vector< vector <Mat> > hog::computeBlocks(int & sizeInput,double e,vector< vecto
 	//cout<<"norm size"<<normalizedBlocks.size()<<" block "<<normValues.size();
 	int numCeldas=normalizedBlocks.size()*normValues.size();
 	/*asumiendo que cada celda es de 6*6*/
-	int numPixeles=numCeldas*36;
+	//int numPixeles=numCeldas*windowSize*windowSize;
 	//cout<<"num pixeles "<<numPixeles;
  	
-  sizeInput=numPixeles;
+  sizeInput=3624;
   return normalizedBlocks;
   
  }
 
-float ** hog::integrate( vector<Mat>block, float ** a, int & indice,int trainEx, int size)
+float ** hog::integrate( vector<Mat>block, float ** a, int & indice,int trainEx, int size, int windowSize)
 {
 	vector<Mat>::const_iterator matricita;
 	//int i=0;
@@ -304,9 +374,9 @@ float ** hog::integrate( vector<Mat>block, float ** a, int & indice,int trainEx,
 		
 		/*assumiendo que la matriz esta hecha de 6*6*/
 		a[trainEx] = new float[size];
-		for(int j=0;j<6;j++)
+		for(int j=0;j<windowSize;j++)
 		{
-			for(int k=0;k<6;k++)
+			for(int k=0;k<windowSize;k++)
 			{
 				if(indice>size)
 					return a;
@@ -315,6 +385,7 @@ float ** hog::integrate( vector<Mat>block, float ** a, int & indice,int trainEx,
 				a[trainEx][indice]=matricita->at<float>(j,k);
 			
 				//cout<<"value"<<matricita->at<float>(j,k);
+				//cout<<"valor indice: "<<indice<<endl;
 				indice++;
 		
 			}
@@ -323,7 +394,7 @@ float ** hog::integrate( vector<Mat>block, float ** a, int & indice,int trainEx,
     return a;
 }
 
-float ** hog::prepareTData(vector < vector<Mat> >  normalizedBlocks,float **trainingData,int numTrain,int size)
+float ** hog::prepareTData(vector < vector<Mat> >  normalizedBlocks,float **trainingData,int numTrain,int size,int windowSize)
 {
 	trainingData[numTrain] = new float[size];
 	
@@ -331,7 +402,7 @@ float ** hog::prepareTData(vector < vector<Mat> >  normalizedBlocks,float **trai
 	int indice=0;
 	for(parteEjemplo=normalizedBlocks.begin();parteEjemplo!=normalizedBlocks.end();++parteEjemplo)
   	{
-		 trainingData=integrate (*parteEjemplo,trainingData,indice,numTrain,size);
+		 trainingData=integrate (*parteEjemplo,trainingData,indice,numTrain,size,windowSize);
 		 //cout<<"indice out: "<<indice<<" size: "<<size<<endl;
 		 
 	  	  indice++;

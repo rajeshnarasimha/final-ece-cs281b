@@ -4,6 +4,8 @@
 #include <iostream>
 #include "ml.h"
 
+#include <fstream>
+
 using namespace std;
 using namespace cv;
 using namespace hog;
@@ -14,15 +16,11 @@ int main(int argc, char** argv)
 	float **test=new float*[1];
 	int size;
 	
-   prepareTrainData(985,"per00", size,trainingData);
-   /*
-	trainEx("per00008.ppm",0,trainingData,"ex11.txt",size);
-	trainEx("per00001.ppm",1,trainingData,"ex22.txt",size);
-	trainEx("per00000.ppm",2,trainingData,"ex00.txt",size);
-	trainEx("per00008.ppm",0,test,"test.txt",size);*/
-	//cout<<"made it here "<<size<<" fuck";
-	/*write(trainingData,size,0,"ex.txt");*/
+	//prepareTrainData(1,"per00", size,trainingData,8,4);
 	
+	
+   prepareTrainData(985,"per00", size,trainingData,8,4);
+   
 	cv::Mat tset(985, size, CV_32FC1,trainingData);
 	//cv::Mat tTest(1, size, CV_32FC1,test);
 	float tLables[985];
@@ -39,12 +37,21 @@ int main(int argc, char** argv)
   	
   	CvSVM svm;
   	svm.train(tset, labels);
+  	ofstream myfile;
+  	myfile.open ("output.txt");
   	for( int i = 0; i < 985; i++){
     	float cls = svm.predict(tset.row(i));
     	cout<<"i value: "<<i;
     	cout << endl<<"Class: " <<fixed << cls <<endl;
+    	myfile <<"i value: "<<i;
+    	myfile<<endl<<"Class: " <<fixed << cls <<endl;
   	}
+  	
+  	
+  	myfile.close();
   	svm.save("svmPersons.xml");
+  	//myfile.close();
+  	
   	//float cls = svm.predict(tTest.row(0));
     //cout << endl<<"Class: " <<fixed << cls <<endl;
     
