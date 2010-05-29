@@ -14,40 +14,9 @@
 #include <highgui.h>
 #include <iostream>
 
-// struct ImagesBundle{
-//   ImagesBundle(IplImage* frame){
-//     frame8u = cvCreateImage(cvSize(frame->width, frame->height), 
-//                             IPL_DEPTH_8U, 1);
-
-//     bg8u = cvCreateImage(cvSize(frame->width, frame->height), 
-//                          IPL_DEPTH_8U, 1);
-
-//     diff = cvCreateImage(cvSize(frame->width, frame->height), 
-//                          IPL_DEPTH_8U, 1);
-
-//     mask = cvCreateImage(cvSize(frame->width, frame->height), 
-//                          IPL_DEPTH_8U, 3);
-//   }
-
-//   ~ImagesBundle(void){
-//     cvReleaseImage(&frame8u);
-//     cvReleaseImage(&bg8u);
-//     cvReleaseImage(&diff);
-//     cvReleaseImage(&mask);
-//   }
-
-//   IplImage* frame8u; //Frame GrayScale
-//   IplImage* bg8u;    //Background GrayScale
-//   IplImage* diff;
-//   IplImage* mask;
-// };
-
 struct ImagesBundle{
   ImagesBundle(const cv::Mat& frame){
     cv::cvtColor(frame, frame8u, CV_8UC1);
-    // bg8u = cv::Mat::zeros(frame8u.rows, frame8u.cols, CV_8UC1);
-    // diff = cv::Mat::zeros(frame8u.rows, frame8u.cols, CV_8UC1);
-    // mask = cv::Mat::zeros(frame8u.rows, frame8u.cols, CV_8UC1);
   }
 
   ~ImagesBundle(void){
@@ -197,6 +166,10 @@ namespace imgutils{
                           const std::vector<unsigned char>& status,
                           cv::Rect& roi, const cv::Size& dim,
                           const cv::Point& compensation);
+
+  void detectBlobs( cv::Mat& frame, std::vector<cv::Rect>& rois, 
+                    const cv::Point& offset,
+                    const int areaThreshold );
 
 }
 

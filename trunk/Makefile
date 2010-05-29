@@ -89,6 +89,7 @@ OBJS=\
 	$(OBJDIR)/Tracking/LucasKanade.o \
 	$(OBJDIR)/utils/utils.o \
 	$(OBJDIR)/MotionAnalysis/MotionAnalyzer.o \
+	$(OBJDIR)/Descriptors/PHOG.o \
 	$(OBJDIR)/Descriptors/hog.o \
 #	$(OBJDIR)/MotionAnalysis/LagrangeInterpolator.o \
 #	$(OBJDIR)/MotionAnalysis/BSplineFitting.o \
@@ -129,7 +130,12 @@ testMotion: $(OBJS) test/testMotionAnalyzer.cpp
 
 testSVM: $(OBJS) test/HocTest.cpp
 	$(CXX) -c -g -ggdb test/HocTest.cpp $(CXXFLAGS) -o test/HocTest.o
-	$(LD) -o test/hogTest $(OBJS) test/HocTest.o $(LDLIBS)
+	$(LD) -o test/hogTest $(OBJS) test/HocTest.o $(LDLIBS) 
+
+testPHOG: $(OBJS) test/PHOGTest.cpp
+	$(CXX) -c -g -ggdb test/PHOGTest.cpp $(CXXFLAGS) -o test/PHOGTest.o
+	$(LD) -o test/phogTest $(OBJS) test/PHOGTest.o $(LDLIBS) -lboost_filesystem
+
 
 clean:
 	rm -rf $(OBJDIR_DEF) $(OBJDIR_DEB)
