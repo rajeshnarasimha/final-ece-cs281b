@@ -12,34 +12,44 @@ using namespace hog;
 
 int main(int argc, char** argv)
 {
-	float **trainingData=new float*[3];
-	float **test=new float*[1];
+	float **trainingData;
+	//float **test=new float*[1];
 	int size;
+	int i=0;
 	
-	//prepareTrainData(1,"per00", size,trainingData,8,4);
 	
-	
-   prepareTrainData(985,"per00", size,trainingData,8,4);
+	trainingData=new float*[1122];
    
-	cv::Mat tset(985, size, CV_32FC1,trainingData);
-	//cv::Mat tTest(1, size, CV_32FC1,test);
-	float tLables[985];
+    prepareTrainData(924,"per00", size,trainingData,8,4,i);
+     prepareTrainData(1121,"example.txt", size,trainingData,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/");
+   
+   
+   //prepareTrainData(831,"pos.txt", size,trainingData,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/");
+   //prepareTrainData(924,"per00", size,trainingData,8,4,i);
+   //prepareTrainData(999,"trainPos.lst", size,trainingData,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/");
+  // prepareTrainData(924,"per00", size,trainingData,8,4,i);
+   //prepareTrainData(1639,"trainNeg.lst", size,trainingData,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/");
+   cout<<"valor i"<<i;
+  cv::Mat tset(1122, size, CV_32FC1,trainingData);
+   float tLables[1122];
+	
 	for(int i=0;i<924;i++)
 	{
 		tLables[i]=1.0;
 	}
-	for(int i=924;i<985;i++)
+	for(int i=924;i<1122;i++)
 	{
 		tLables[i]=-1.0;
 	}
-  	//float _labels[]={2.0,2.0,3.0};
-  	cv::Mat labels(985, 1, CV_32FC1,tLables);
-  	
-  	CvSVM svm;
+	cv::Mat labels(1122, 1, CV_32FC1,tLables);
+	
+	CvSVM svm;
+	
   	svm.train(tset, labels);
+  	
   	ofstream myfile;
   	myfile.open ("output.txt");
-  	for( int i = 0; i < 985; i++){
+  	for( int i = 0; i <1122; i++){
     	float cls = svm.predict(tset.row(i));
     	cout<<"i value: "<<i;
     	cout << endl<<"Class: " <<fixed << cls <<endl;
@@ -50,10 +60,10 @@ int main(int argc, char** argv)
   	
   	myfile.close();
   	svm.save("svmPersons.xml");
-  	//myfile.close();
-  	
-  	//float cls = svm.predict(tTest.row(0));
-    //cout << endl<<"Class: " <<fixed << cls <<endl;
+    
+	
+	
+  	//svm.save("svmPersons.xml");*/
     
 	return 0;
 }
