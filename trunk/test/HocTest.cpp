@@ -18,30 +18,30 @@ int main(int argc, char** argv)
 	int i=0;
 	
 	
-	trainingData=new float*[1122];
+	trainingData=new float*[1007];
    
     prepareTrainData(924,"per00", size,trainingData,8,4,i);
-     prepareTrainData(1121,"example.txt", size,trainingData,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/");
+     prepareTrainData(1007,"bikeList.lst", size,trainingData,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/bike/");
    
-   
+   /*
    //prepareTrainData(831,"pos.txt", size,trainingData,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/");
    //prepareTrainData(924,"per00", size,trainingData,8,4,i);
    //prepareTrainData(999,"trainPos.lst", size,trainingData,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/");
   // prepareTrainData(924,"per00", size,trainingData,8,4,i);
-   //prepareTrainData(1639,"trainNeg.lst", size,trainingData,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/");
+   //prepareTrainData(1639,"trainNeg.lst", size,trainingData,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/");*/
    cout<<"valor i"<<i;
-  cv::Mat tset(1122, size, CV_32FC1,trainingData);
-   float tLables[1122];
+  cv::Mat tset(1007, size, CV_32FC1,trainingData);
+   float tLables[1007];
 	
 	for(int i=0;i<924;i++)
 	{
 		tLables[i]=1.0;
 	}
-	for(int i=924;i<1122;i++)
+	for(int i=924;i<1007;i++)
 	{
 		tLables[i]=-1.0;
 	}
-	cv::Mat labels(1122, 1, CV_32FC1,tLables);
+	cv::Mat labels(1007, 1, CV_32FC1,tLables);
 	
 	CvSVM svm;
 	
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
   	
   	ofstream myfile;
   	myfile.open ("output.txt");
-  	for( int i = 0; i <1122; i++){
+  	for( int i = 0; i <1007; i++){
     	float cls = svm.predict(tset.row(i));
     	cout<<"i value: "<<i;
     	cout << endl<<"Class: " <<fixed << cls <<endl;
