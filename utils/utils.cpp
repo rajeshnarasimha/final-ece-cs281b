@@ -8,8 +8,12 @@
  */
 
 #include <utils.h>
+#include <algorithm>
 
 using namespace cv;
+
+bool xDiff(cv::Point i, cv::Point j);
+bool yDiff(cv::Point i, cv::Point j);
 
 void imgutils::buildRGBHistogram(const IplImage* patch, 
                                  MatND& histogram, 
@@ -297,6 +301,50 @@ void imgutils::findSurroundingBox(const std::vector<cv::Point2f>& corners,
     roi.height = (roi.y + roi.height < dim.height) ? 
       roi.height : dim.height - roi.y - 1 ;
 
+  }
+}
+
+bool xDiff(cv::Point i, cv::Point j) { 
+  return (i.x < j.x); 
+}
+
+bool yDiff(cv::Point i, cv::Point j) { 
+  return (i.y < j.y); 
+}
+
+
+void imgutils::detectBlobs( cv::Mat& frame,
+                            std::vector<cv::Rect>& rois,
+                            const cv::Point& offset,
+                            const int areaThreshold ){
+  std::vector< std::vector<cv::Point> > contours;
+  cv::findContours(frame, contours, CV_RETR_EXTERNAL, 
+                   CV_CHAIN_APPROX_SIMPLE, offset);
+
+  
+  std::vector< std::vector<cv::Point> >::iterator row_it;
+  std::vector<cv::Point>::iterator contour;
+
+  for( row_it = contours.begin(); row_it != contours.end(); ++row_it){
+    std::sort( (*row_it).begin(), (*row_it).end(), xDiff);
+    int x  = (*row_it)[0].x - offset.x;
+    int dx = (*row_it).back().x - x + offset.x + 1;
+
+    std::sort( (*row_it).begin(), (*row_it).end(), yDiff);
+    int y  = (*row_it)[0].y - offset.y;
+    int dy = (*row_it).back().y - y + offset.y + 1;
+
+    //See if the blobs are close to each other
+    //Merge them if necessary
+    //This would be using a Voronoi, or any KD-Tree
+    
+
+    if( dx * dy < areaThreshold ){
+      continue;
+    }
+
+    cv::Rect roi(x,y,dx,dy);
+    rois.push_back(roi);
   }
 }
 
