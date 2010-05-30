@@ -15,6 +15,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "ml.h"
 using namespace std;
 using namespace cv;
 
@@ -125,6 +126,7 @@ void hog::prepareDerImages(string pictureName,Mat & dx, Mat & dy)
 
 	
 }
+
 
 float ** hog::trainEx(Mat originalImage,int trainEx,float **trainingData,string nameFileWrite,int & sizeInput,int windowSize,int blockSize)
 {
@@ -337,9 +339,22 @@ float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,f
   	return trainingData;
   }
 
-float hog:: predictionHOG()
+float hog:: predictionHOG(Mat originalImage)
 {
-	return 1.0;
+	float ** descriptor=new float*[1];
+	int sizeDescriptor;
+	descriptor=trainEx(originalImage,0,descriptor,"descriptor.txt",sizeDescriptor,8,4);
+	Mat tset(1, sizeDescriptor, CV_32FC1,descriptor);
+	CvSVM svm;
+	svm.load(("svmPersons.xml"));
+    float cls = svm.predict(tset.row(0));
+    cout << endl<<"Class: " <<fixed << cls <<endl;
+    return cls;	
+  	
+	
+	
+	
+
 }
 float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock,int & i,string ruta)
 {
