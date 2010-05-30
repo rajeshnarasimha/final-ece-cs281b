@@ -27,17 +27,22 @@ void write(float **trainingData,int size, int numTrain,std::string nameFile);
  
  double calculateL2Norm(cv::MatND matricita);
  
- void trainEx(std::string fileName,int trainEx,float **trainingData,std::string nameFileWrite,int & size,int windowSize,int blockSize);
+ void obtainTestDescriptor(std::string fileName, std::string outputName,int & size,float **descriptor,int sizeCeldas,int sizeBlock);
+ 
+ float ** trainEx(std::string fileName,int trainEx,float **trainingData,std::string nameFileWrite,int & size,int windowSize,int blockSize);
   
- void prepareDerImages(std::string pictureName,cv::Mat & dx, cv::Mat & dy); 
+ void prepareDerImages(std::string pictureName,cv::Mat & dx, cv::Mat & dy);
+ float ** trainEx(cv::Mat originalImage,int trainEx,float **trainingData,std::string nameFileWrite,int & sizeInput,int windowSize,int blockSize);
+ void prepareDerImages(cv::Mat img,cv::Mat & dx, cv::Mat & dy); 
  
  std::vector <cv::Mat> normalizeBlock(std::vector <cv::MatND>   block, double e);
- 
+ float predictionHOG();
  float ** integrate( std::vector<cv::Mat>block, float  ** a, int & indice,int trainEx,int size,int windowSize);
- void prepareTrainData(int numTrainExample,std::string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock);
+ float ** prepareTrainData(int numTrainExample,std::string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock,int & i,std::string ruta );
  
- 
-std::vector< std::vector <cv::Mat> >  computeBlocks(int & sizeInput,double e,std::vector< std::vector<cv::MatND> > rowsOfCells,int windowSize,int blockSize);
+ float ** prepareTrainData(int numTrainExample,std::string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock,int & i);
+
+void computeBlocks(int & sizeInput,double e,std::vector< std::vector<cv::MatND> > rowsOfCells,int windowSize,int blockSize,std::vector< std::vector <cv::Mat> > & normalizedBlocks);
  
  float ** prepareTData(std::vector < std::vector<cv::Mat> >  normalizedBlocks,float **trainingData,int numTrain,int size,int windowSize);
            
