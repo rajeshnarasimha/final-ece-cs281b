@@ -45,7 +45,7 @@ void write(float **trainingData,int size, int numTrain,std::string nameFile);
 void computeBlocks(int & sizeInput,double e,std::vector< std::vector<cv::MatND> > rowsOfCells,int windowSize,int blockSize,std::vector< std::vector <cv::Mat> > & normalizedBlocks);
  
  float ** prepareTData(std::vector < std::vector<cv::Mat> >  normalizedBlocks,float **trainingData,int numTrain,int size,int windowSize);
-           
+  void writeDescriptors(float **trainingData,int size, int numTrain,std::string nameFile);         
 }
 
 

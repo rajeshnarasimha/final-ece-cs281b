@@ -38,6 +38,27 @@ void hog::write(float **trainingData,int size, int numTrain,string nameFile)
 }
 
 
+void hog::writeDescriptors(float **trainingData,int size, int numTrain,string nameFile)
+{
+	ofstream myfile;
+  	myfile.open (nameFile.c_str());
+  	
+  	for( int j=0;j<numTrain;j++)
+  	{
+  		for(int i=0;i<size;i++)
+		{
+		
+			//cout<<"J,I "<<j<<", "<<i<<endl;
+			myfile <<trainingData[j][i]<<endl;
+			//trainingData[numTrain][size];	
+		}
+		myfile <<endl;
+	}
+	myfile.close();
+	
+}
+
+
 
 
 vector <Mat>  hog::normalizeBlock(vector <MatND>   block, double e)
@@ -50,9 +71,11 @@ vector <Mat>  hog::normalizeBlock(vector <MatND>   block, double e)
 		total=tempTotal+total;
 		
 	}
+	e=e*e;
 	total=total+e;
 	total=sqrt(total);
-	total=total+e;
+	//total=total+e;
+	total=1/total;
 	vector <Mat>  normBlock;
 	for(celdita=block.begin();celdita!=block.end();++celdita)
   	{
@@ -158,16 +181,16 @@ float ** hog::trainEx(Mat originalImage,int trainEx,float **trainingData,string 
 		}
 		
 	}
-	 
+	
+	char num [3];
+  	sprintf (num, "%d",trainEx);
+  	nameFileWrite.append(num);
+  	nameFileWrite.append(".txt");
+	
+	 //write(trainingData,sizeInput,trainEx,nameFileWrite);
 	return trainingData;
 	
 }
-
-
-
-
-
-
 
 
 float ** hog::trainEx(string fileName,int trainEx,float **trainingData,string nameFileWrite,int & sizeInput,int windowSize,int blockSize)
@@ -208,7 +231,7 @@ float ** hog::trainEx(string fileName,int trainEx,float **trainingData,string na
 		
 	}
 	 
-//	write(trainingData,sizeInput,trainEx,nameFileWrite);
+	//write(trainingData,sizeInput,trainEx,nameFileWrite);
 	return trainingData;
 	
 }
@@ -343,10 +366,12 @@ float hog:: predictionHOG(Mat originalImage)
 {
 	float ** descriptor=new float*[1];
 	int sizeDescriptor;
-	descriptor=trainEx(originalImage,0,descriptor,"descriptor.txt",sizeDescriptor,8,4);
-	Mat tset(1, sizeDescriptor, CV_32FC1,descriptor);
+	int i=0;
+	//descriptor=prepareTrainData(1,"bikeList.lst", sizeDescriptor,descriptor,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/bike/");
+	descriptor=trainEx(originalImage,0,descriptor,"descriptor",sizeDescriptor,8,4);
+	Mat tset(1,sizeDescriptor, CV_32FC1,descriptor);
 	CvSVM svm;
-	svm.load(("svmPersons.xml"));
+	svm.load(("bicis.xml"));
     float cls = svm.predict(tset.row(0));
     cout << endl<<"Class: " <<fixed << cls <<endl;
     return cls;	
@@ -356,9 +381,10 @@ float hog:: predictionHOG(Mat originalImage)
 	
 
 }
+
 float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock,int & i,string ruta)
 {
-	trainingData=new float*[numTrainExample];
+	//trainingData=new float*[numTrainExample];
 	 string line;
 	 cout<<"file name "<<fileName;
   	ifstream myfile (fileName.c_str());
@@ -377,8 +403,8 @@ float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,f
 			}
       		name.append(line);
       		
-      		cout<<endl<<"final name: "<<name<<endl;
-      		trainingData=trainEx(name,i,trainingData,"outputName.txt",size,sizeCeldas,sizeBlock);
+      		cout<<endl<<"final name: "<<name<<endl<<"value i "<<i;
+      		trainingData=trainEx(name,i,trainingData,"trainingDescr",size,sizeCeldas,sizeBlock);
       		i++;
       		cout<<i;
       //	cout << line << endl;
@@ -455,7 +481,21 @@ void hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > rowsOfC
 	   {
 		   
 		   normValues=normalizeBlock(listOfBlocks[k][j], e);
+		   //vector <MatND>   blockX;
+		   /*vector<Mat>  ::const_iterator celditaX;
+		   for(celditaX=normValues.begin();celditaX<normValues.end();++celditaX)
+  			{
+		  
+			   Mat tempCell=*celditaX;
+			   for(int z=0;z<9;z++)
+			   {
+				   cout<<"cell value: "<<tempCell.at<float>(0,z)<<endl;
+			   }
+			  
+		   }*/
+		   
 		   normalizedBlocks.push_back(normValues);
+		   
 	   }
    }
    //int numCeldas=normalizedBlocks.size()*normValues.size();
