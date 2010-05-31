@@ -366,7 +366,7 @@ float hog:: predictionHOG(Mat originalImage)
 {
 	float ** descriptor=new float*[1];
 	int sizeDescriptor;
-	int i=0;
+	//int i=0;
 	//descriptor=prepareTrainData(1,"bikeList.lst", sizeDescriptor,descriptor,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/bike/");
 	descriptor=trainEx(originalImage,0,descriptor,"descriptor",sizeDescriptor,8,4);
 	Mat tset(1,sizeDescriptor, CV_32FC1,descriptor);
@@ -449,10 +449,10 @@ void hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > rowsOfC
 		  listOfBlocks[z]=new vector<MatND> [(heigthGroupOfCells/blockSize)];
 	  }
 	  // vector<MatND> listOfBlocks[widthGroupOfCells/blockSize][(heigthGroupOfCells/blockSize)];
-	  int numRow=0;
+	  unsigned int numRow=0;
 	  //cout<<"renlones "<<widthGroupOfCells/blockSize<<endl;
 	  //cout<<"columnas"<<heigthGroupOfCells/blockSize<<endl;
-	  for(int i=0;i<widthGroupOfCells/blockSize;i++)
+	  for( int i=0;i<widthGroupOfCells/blockSize;i++)
 	  {
 		  for(int j=0;j<heigthGroupOfCells/blockSize;j++)
 		  {
@@ -583,7 +583,7 @@ vector< vector <Mat> > hog::computeBlocks(int & sizeInput,double e,vector< vecto
 	
 	
 	//cout<<"norm size"<<normalizedBlocks.size()<<" block "<<normValues.size();
-	int numCeldas=normalizedBlocks.size()*normValues.size();
+//	int numCeldas=normalizedBlocks.size()*normValues.size();
 	/*asumiendo que cada celda es de 6*6*/
 	//int numPixeles=numCeldas*windowSize*windowSize;
 	//cout<<"num pixeles "<<numPixeles;
