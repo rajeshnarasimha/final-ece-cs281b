@@ -7,8 +7,8 @@
  * Victor M. Fragoso <vfragoso@cs.ucsb.edu>
  */
 
-#ifndef __HOG_CLASS__
-#define __HOG_CLASS__
+#ifndef __PHOG_CLASS__
+#define __PHOG_CLASS__
 
 #include <cv.h>
 #include <highgui.h>
@@ -16,7 +16,7 @@
 
 class PHOG{
 public:
-  enum{ L1NORM, L2NORM, L2NORM_BLOCK};
+  enum{ L1NORM, L2NORM, L2NORM_BLOCK };
 
   PHOG(const int bins,
        const int maxAngle,
