@@ -426,10 +426,10 @@ float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,f
   
  
   
-void hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > rowsOfCells,int windowSize,int blockSize,vector< vector <Mat> > & normalizedBlocks)
+void hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > rowsOfCells,int windowSize,const int blockSize,vector< vector <Mat> > & normalizedBlocks)
   {
-	  int widthGroupOfCells=rowsOfCells.at(0).size();
-	  int heigthGroupOfCells=rowsOfCells.size();
+	    int const  widthGroupOfCells=rowsOfCells.at(0).size();
+	   int const heigthGroupOfCells=rowsOfCells.size();
 	  //cout<<endl<<"width "<<widthGroupOfCells;
 	  //cout<<endl<<"height "<<heigthGroupOfCells;
 	  int totalOfBlocks=widthGroupOfCells/blockSize;
@@ -440,7 +440,15 @@ void hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > rowsOfC
 	  vector< vector<MatND> > block;
 	  vector< vector<MatND> > rowOfBlocks;
 	  //cout<<endl<<" block width: "<<widthGroupOfCells/blockSize<<" block height "<<(heigthGroupOfCells/blockSize);
-	  vector<MatND> listOfBlocks[widthGroupOfCells/blockSize][(heigthGroupOfCells/blockSize)];
+	  
+	  vector<MatND> ** listOfBlocks=NULL;
+	  listOfBlocks=new vector<MatND> *[widthGroupOfCells/blockSize];
+	  for (int z=0;z<widthGroupOfCells/blockSize;z++)
+	  {
+		  
+		  listOfBlocks[z]=new vector<MatND> [(heigthGroupOfCells/blockSize)];
+	  }
+	  // vector<MatND> listOfBlocks[widthGroupOfCells/blockSize][(heigthGroupOfCells/blockSize)];
 	  int numRow=0;
 	  //cout<<"renlones "<<widthGroupOfCells/blockSize<<endl;
 	  //cout<<"columnas"<<heigthGroupOfCells/blockSize<<endl;
@@ -508,7 +516,14 @@ void hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > rowsOfC
   //cout<<endl<<"size norm Block "<<normalizedBlocks.size()<<"size input "<<sizeInput;
    //sizeInput=4099;
    //return normalizedBlocks;
-		 
+  
+   for (int z=0;z<widthGroupOfCells/blockSize;z++)
+	  {
+		  delete [] listOfBlocks[z];
+		  //listOfBlocks[z]=new vector<MatND> [(heigthGroupOfCells/blockSize)];
+	  }
+		 delete [] listOfBlocks;
+		 listOfBlocks=NULL;
   		
   	}
 vector< vector <Mat> > hog::computeBlocks(int & sizeInput,double e,vector< vector<MatND> > cells,int windowSize)
