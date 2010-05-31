@@ -90,7 +90,7 @@ OBJS=\
 	$(OBJDIR)/utils/utils.o \
 	$(OBJDIR)/MotionAnalysis/MotionAnalyzer.o \
 	$(OBJDIR)/Descriptors/PHOG.o \
-	$(OBJDIR)/Descriptors/hog.o \
+#	$(OBJDIR)/Descriptors/hog.o \
 #	$(OBJDIR)/MotionAnalysis/LagrangeInterpolator.o \
 #	$(OBJDIR)/MotionAnalysis/BSplineFitting.o \
 	# $(OBJDIR)/utils/Histogram.o \
