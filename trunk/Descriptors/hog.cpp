@@ -204,7 +204,7 @@ float ** hog::trainEx(string fileName,int trainEx,float **trainingData,string na
 	//float **trainingData=new float*[3];
 	//int sizeInput=0;
 	double e=0.0002;
-	cout<<"llegue aqui con "<<fileName;
+	//cout<<"llegue aqui con "<<fileName;
 	prepareDerImages(fileName, dx,dy);
 	Size windowCell(windowSize,windowSize);
 	
@@ -336,7 +336,7 @@ float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,f
   		else if(i==2)
   			newFileName="per00000.ppm";*/
   		
-  		cout<<"this is the i of Training"<<i<<endl;	
+  		//cout<<"this is the i of Training"<<i<<endl;	
   			
   		trainingData=trainEx(newFileName,i,trainingData,outputName,size,sizeCeldas,sizeBlock,binSize);
   		i++;
@@ -374,7 +374,7 @@ float hog:: predictionHOG(Mat originalImage, int numBlocks,int numCeldas,int bin
 	CvSVM svm;
 	svm.load(("SVMbicis.xml"));
     float cls = svm.predict(tset.row(0));
-    cout << endl<<"Class: " <<fixed << cls <<endl;
+    //cout << endl<<"Class: " <<fixed << cls <<endl;
     return cls;	
   	
 	
@@ -387,11 +387,11 @@ float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,f
 {
 	//trainingData=new float*[numTrainExample];
 	 string line;
-	 cout<<"file name "<<fileName;
+	 //cout<<"file name "<<fileName;
   	ifstream myfile (fileName.c_str());
   	if (myfile.is_open())
   	{
-		cout<<"llegue aqui";
+		//cout<<"llegue aqui";
     	while (! myfile.eof() && (i<numTrainExample))
     	{
 			
@@ -399,21 +399,21 @@ float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,f
       		getline (myfile,line);
       		if(line.compare("")==0)
       		{
-				cout<<endl<<"empty shit I'm out"<<endl;
+				//cout<<endl<<"empty shit I'm out"<<endl;
 				return trainingData;
 			}
       		name.append(line);
       		
-      		cout<<endl<<"final name: "<<name<<endl<<"value i "<<i;
+      		//cout<<endl<<"final name: "<<name<<endl<<"value i "<<i;
       		trainingData=trainEx(name,i,trainingData,"trainingDescr",size,sizeCeldas,sizeBlock,sizeBin);
       		i++;
-      		cout<<i;
+      		//cout<<i;
       //	cout << line << endl;
     	}
     	myfile.close();
   	}
   	else
-  	cout<<"no logre nada";
+  	//cout<<"no logre nada";
 
   	
   		
