@@ -14,6 +14,8 @@
 #include <highgui.h>
 #include <iostream>
 
+const cv::Size dsize(64,128);
+
 struct ImagesBundle{
   ImagesBundle(const cv::Mat& frame){
     cv::cvtColor(frame, frame8u, CV_8UC1);
@@ -52,6 +54,11 @@ namespace imgutils{
   void maskFrameGray(const cv::Mat& frame, 
                      const cv::Rect& roi, 
                      cv::Mat& maskedFrame);
+
+  inline
+  void resize64x128(const cv::Mat& src, cv::Mat& dst, const cv::Rect& roi){
+    cv::resize(src, dst, dsize, 0, 0, cv::INTER_CUBIC);
+  }
 
   inline
   void bgr2gray(const cv::Mat& bgr, cv::Mat& gray){
@@ -169,7 +176,8 @@ namespace imgutils{
 
   void detectBlobs( cv::Mat& frame, std::vector<cv::Rect>& rois, 
                     const cv::Point& offset,
-                    const int areaThreshold );
+                    const unsigned int minAreaThreshold,
+                    const unsigned int maxAreaThreshold );
 
 }
 

@@ -88,6 +88,7 @@ OBJS=\
 	$(OBJDIR)/Tracking/MeanShift.o \
 	$(OBJDIR)/Tracking/LucasKanade.o \
 	$(OBJDIR)/utils/utils.o \
+	$(OBJDIR)/utils/ClassifierWrapper.o \
 	$(OBJDIR)/MotionAnalysis/MotionAnalyzer.o \
 	$(OBJDIR)/Descriptors/PHOG.o \
 	$(OBJDIR)/Descriptors/hog.o \
@@ -136,6 +137,9 @@ testPHOG: $(OBJS) test/PHOGTest.cpp
 	$(CXX) -c -g -ggdb test/PHOGTest.cpp $(CXXFLAGS) -o test/PHOGTest.o
 	$(LD) -o test/phogTest $(OBJS) test/PHOGTest.o $(LDLIBS) -lboost_filesystem
 
+testInt: $(OBJS) test/IntegralTest.cpp
+	$(CXX) -c -g -ggdb test/IntegralTest.cpp $(CXXFLAGS) -o test/IntegralTest.o
+	$(LD) -o test/integralTest $(OBJS) test/IntegralTest.o $(LDLIBS)
 
 clean:
 	rm -rf $(OBJDIR_DEF) $(OBJDIR_DEB)

@@ -316,7 +316,8 @@ bool yDiff(cv::Point i, cv::Point j) {
 void imgutils::detectBlobs( cv::Mat& frame,
                             std::vector<cv::Rect>& rois,
                             const cv::Point& offset,
-                            const int areaThreshold ){
+                            const unsigned int minAreaThreshold,
+                            const unsigned int maxAreaThreshold ){
   std::vector< std::vector<cv::Point> > contours;
   cv::findContours(frame, contours, CV_RETR_EXTERNAL, 
                    CV_CHAIN_APPROX_SIMPLE, offset);
@@ -337,9 +338,13 @@ void imgutils::detectBlobs( cv::Mat& frame,
     //See if the blobs are close to each other
     //Merge them if necessary
     //This would be using a Voronoi, or any KD-Tree
-    
 
-    if( dx * dy < areaThreshold ){
+    unsigned int area = dx*dy;
+    if( area < minAreaThreshold ){
+      continue;
+    }
+
+    if( area > maxAreaThreshold ){
       continue;
     }
 

@@ -17,10 +17,12 @@
 class PHOG{
 public:
   enum{ L1NORM, L2NORM, L2NORM_BLOCK };
+  enum Edge{ SIMPLE, SOBEL };
 
   PHOG(const int bins,
        const int maxAngle,
-       const int l);
+       const int l,
+       enum Edge e=SIMPLE);
 
   ~PHOG(void);
 
@@ -46,6 +48,7 @@ private:
   const int maxAngle;
   const int l;
   cv::Size imgSize;
+  enum Edge e;
   //int dimension;
   
   void computeGradient( const cv::Mat& img, 
