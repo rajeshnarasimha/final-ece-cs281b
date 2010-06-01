@@ -122,6 +122,17 @@ namespace imgutils{
     return dotProduct(c,c);
   }
 
+  inline float* mat2linarray(const float** mat, int cols, int rows){
+    float* linarray = new float[cols*rows];
+    int d = 0;
+
+    for( register int y = 0; y < rows; y++)
+      for( register int x = 0; x < cols; x++)
+        linarray[d++] = mat[y][x];
+
+    return linarray;
+  }
+
   inline void dumpRectangle( const cv::Rect& r){
     std::cout << "X: " << r.x << std::endl;
     std::cout << "Y: " << r.y << std::endl;

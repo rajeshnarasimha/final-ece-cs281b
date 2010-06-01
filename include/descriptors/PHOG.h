@@ -16,7 +16,9 @@
 
 class PHOG{
 public:
-  enum{ L1NORM, L2NORM, L2NORM_BLOCK };
+  enum{ L1NORM=101, 
+        L2NORM=102, 
+        L2NORM_BLOCK=103 };
   enum Edge{ SIMPLE, SOBEL };
 
   PHOG(const int bins,
