@@ -45,6 +45,7 @@ static std::string trainStr = "--train";
 static std::string testStr  = "--test";
 
 static CvSVM classifier;
+static PHOG hog(9, 180, 2);
 
 int main(int argc, char** argv){
 
@@ -87,8 +88,10 @@ void readDataSet( const path& directory,
             pos = file.find(posprefix);
 
             if( pos != std::string::npos ){
+              std::cout << file << " => " << -1 << std::endl;
               labels.push_back(-1.0f);
             }else{
+              std::cout << file << " => " << 1 << std::endl;
               labels.push_back(1.0f);              
             }
             
@@ -111,7 +114,7 @@ void train(const std::string& _tset,
   std::vector<float> labels;
   std::vector<float*> descriptors;
 
-  readDataSet( _tset, ".ppm", "obj", files, labels );
+  readDataSet( _tset, ".ppm", "person_and_bike_", files, labels, false);
 
   std::cout << "NumFiles: " << files.size() << std::endl;
 
@@ -119,14 +122,22 @@ void train(const std::string& _tset,
   for( std::vector<std::string>::const_iterator it = files.begin();
        it != files.end(); ++it, idx++){
     cv::Mat img = cv::imread((*it));
+
+    if( img.empty() ){
+      std::cerr << (*it) << " not loaded" << std::endl;
+    }
+
     cv::Mat img_gray;
     
     imgutils::bgr2gray(img, img_gray);
     images.push_back( img_gray );
   }
 
-  PHOG hog(9, 180, 4);
-  
+
+  //////////////////////////////////////////////////////////////////
+  //Computing Descriptors
+  std::cout << "Computing Descriptors..." << std::endl;
+
   int dimension = 0;
   hog.computeDescriptor( images, descriptors, dimension, PHOG::L2NORM );
 
@@ -141,16 +152,27 @@ void train(const std::string& _tset,
     tset[idx]    = (*descriptor);
     tlabels[idx] = static_cast<float>( labels[idx] );
 
+    // for( int i = 0; i < dimension; i++){
+    //   descriptorsFile << std::fixed << (*descriptor)[i] << " ";
+    // }
+    // descriptorsFile << std::endl;
+
   }
 
   cv::Mat cvTset(descriptors.size(), dimension, CV_32F, tset);
   cv::Mat cvLset(labels.size(), 1, CV_32FC1, tlabels);
+  ///////////////////////////////////////////////////////////////////
+  //SVM Training
+  //////////////////////////////////////////////////////////////////
+  std::cout << "Training SVM..." << std::endl;
 
   CvSVMParams params;
   params.svm_type = CvSVM::C_SVC;
-  params.kernel_type = CvSVM::RBF;
-  params.gamma = 0.80;
-  params.C = 0.80;
+  params.kernel_type = CvSVM::LINEAR;
+  params.gamma = 0.95;
+  params.C = 0.99;
+  //params.svm_type = CvSVM::ONE_CLASS;
+  //params.nu = 0.5;
   
   // //CvBoostParams params;
   // //params.boost_type =CvBoost::GENTLE;
@@ -169,7 +191,6 @@ void train(const std::string& _tset,
   // //                  params) ){
   // //if( !nn.train(cvTset, cvLset, w) ){
   //if( !classifier.train(cvTset, cvLset) ){
-
   if( !classifier.train(cvTset, cvLset, cv::Mat(), cv::Mat(), params) ){
     std::cerr << "Cannot Train" << std::endl;
   }
@@ -205,7 +226,6 @@ void testSVM(const std::string& xml,
              const std::string& test_bed,
              const std::string& report){
   //Loading 
-  std::cout << "Loading: " << xml << std::endl;
   classifier.load(xml.c_str());
 
   CvSVMParams params = classifier.get_params();
@@ -218,7 +238,7 @@ void testSVM(const std::string& xml,
   std::vector<float> labels;
   std::vector<float*> descriptors;
 
-  readDataSet(test_bed, ".ppm", "obj", files, labels);
+  readDataSet(test_bed, ".ppm", "person_and_bike_", files, labels, false);
 
   std::cout << "NumFiles: " << files.size() << std::endl;
 
@@ -226,13 +246,17 @@ void testSVM(const std::string& xml,
   for( std::vector<std::string>::const_iterator it = files.begin();
        it != files.end(); ++it, idx++){
     cv::Mat img = cv::imread((*it));
+    
+    if( img.empty() ){
+      std::cerr << (*it) << " not loaded" << std::endl;
+    }
+
     cv::Mat img_gray;
     
     imgutils::bgr2gray(img, img_gray);
     images.push_back( img_gray );
   }
 
-  PHOG hog(9, 180, 4);
   
   int dimension = 0;
   hog.computeDescriptor( images, descriptors, dimension, PHOG::L2NORM );
@@ -256,7 +280,7 @@ void testSVM(const std::string& xml,
   //Test
   idx = 0;
   int errors = 0;
-  std::ofstream outfile("train_errors.dat");
+  std::ofstream outfile("test_errors.dat");
   std::vector<std::string>::iterator file_it = files.begin();
   for( std::vector<float*>::iterator descriptor = descriptors.begin();
        descriptor != descriptors.end(); ++descriptor, idx++, ++file_it){

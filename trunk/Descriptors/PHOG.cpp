@@ -35,8 +35,9 @@ inline void scaleDescriptor(float* descriptor, int size, float scalar){
   }
 }
 
-PHOG::PHOG(const int _bins, const int _maxAngle, const int _l) 
+PHOG::PHOG(const int _bins, const int _maxAngle, const int _l, enum Edge _e) 
   : bins(_bins), maxAngle(_maxAngle), l(_l){   
+  e = _e;
 }
 
 PHOG::~PHOG(void){
@@ -86,12 +87,25 @@ void PHOG::computeDescriptor(const std::vector<cv::Mat>& imgs,
 
 void PHOG::computeGradient( const cv::Mat& img,
                             cv::Mat& dx, cv::Mat& dy ){
-  float gradOp[] = {-1.0f, 0.0f, 1.0f};
-  cv::Mat dx_op(1, 3, CV_32F, gradOp);
-  cv::Mat dy_op = dx_op.t();
 
-  cv::filter2D(img, dx, CV_32F, dx_op);
-  cv::filter2D(img, dy, CV_32F, dy_op);
+  switch( e ){
+  case SIMPLE:
+    {
+      float gradOp[] = {-1.0f, 0.0f, 1.0f};
+      cv::Mat dx_op(1, 3, CV_32F, gradOp);
+      cv::Mat dy_op = dx_op.t();
+      
+      cv::filter2D(img, dx, CV_32F, dx_op);
+      cv::filter2D(img, dy, CV_32F, dy_op);
+    }
+    break;
+  case SOBEL:
+    {
+      cv::Sobel(img, dx, CV_32F, 1, 0);
+      cv::Sobel(img, dy, CV_32F, 0, 1);
+    }
+  };
+
 }
 
 void PHOG::computePhasor(const cv::Mat& dx, 
@@ -101,7 +115,17 @@ void PHOG::computePhasor(const cv::Mat& dx,
                          cv::Mat& magn){
 
   cv::Mat dot = dx.mul(dx) + dy.mul(dy);
-  cv::Mat t = dy / dx; 
+
+  cv::Mat_<float> dx_p;
+  dx.copyTo(dx_p);
+
+  //Avoiding division by zero
+  cv::Mat_<float>::iterator it = dx_p.begin();
+  for( ; it != dx_p.end(); ++it){
+    if( *it == 0.0f) (*it) = 0.00001f;
+  }
+
+  cv::Mat t = dy / dx_p; 
 
   int step = maxAngle / bins;
 
@@ -218,6 +242,10 @@ void PHOG::normalizeHistogram(float* histogram, const int size, int norm){
   case PHOG::L2NORM:
     {
       float norm = sqrtf( dotProduct(histogram, size) );
+      if( norm == 0.0f ){
+        std::cout << "Warning: Norm Zero" << std::endl;
+        norm = 0.0001f;
+      }
       scaleDescriptor(histogram, size, norm);
     }
     break;
