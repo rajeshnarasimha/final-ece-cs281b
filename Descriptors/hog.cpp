@@ -123,10 +123,10 @@ void hog::prepareDerImages(Mat img,Mat & dx, Mat & dy)
           return;
         }
 
-	imgutils::bgr2gray(img, gray);
+	//imgutils::bgr2gray(img, gray);
 
-	Sobel(gray, dx, CV_8U, 1, 0);
-	Sobel(gray, dy, CV_8U, 0, 1);
+	Sobel(img, dx, CV_8U, 1, 0);
+	Sobel(img, dy, CV_8U, 0, 1);
 
 	
 }
