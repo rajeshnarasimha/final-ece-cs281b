@@ -151,7 +151,7 @@ void hog::prepareDerImages(string pictureName,Mat & dx, Mat & dy)
 }
 
 
-float ** hog::trainEx(Mat originalImage,int trainEx,float **trainingData,string nameFileWrite,int & sizeInput,int windowSize,int blockSize)
+float ** hog::trainEx(Mat originalImage,int trainEx,float **trainingData,string nameFileWrite,int & sizeInput,int windowSize,int blockSize, int binSize)
 {
 	
 	Mat dx,dy;
@@ -162,7 +162,8 @@ float ** hog::trainEx(Mat originalImage,int trainEx,float **trainingData,string 
 	prepareDerImages(originalImage, dx,dy);
 	Size windowCell(windowSize,windowSize);
 	
-	computeCells(dx,dy,windowCell,cells);
+	
+	computeCells(dx,dy,windowCell,cells,9);
 	
 	vector< vector <Mat> > normalizedBlocks;
 	computeBlocks(sizeInput, e,cells,windowSize,blockSize,normalizedBlocks);
@@ -193,7 +194,7 @@ float ** hog::trainEx(Mat originalImage,int trainEx,float **trainingData,string 
 }
 
 
-float ** hog::trainEx(string fileName,int trainEx,float **trainingData,string nameFileWrite,int & sizeInput,int windowSize,int blockSize)
+float ** hog::trainEx(string fileName,int trainEx,float **trainingData,string nameFileWrite,int & sizeInput,int windowSize,int blockSize,int binSize)
 {
 	
 	Mat dx,dy;
@@ -207,7 +208,7 @@ float ** hog::trainEx(string fileName,int trainEx,float **trainingData,string na
 	prepareDerImages(fileName, dx,dy);
 	Size windowCell(windowSize,windowSize);
 	
-	computeCells(dx,dy,windowCell,cells);
+	computeCells(dx,dy,windowCell,cells,binSize);
 	//blocks=computeBlocks(sizeInput, e,cells,windowSize,2);
 	vector< vector <Mat> > normalizedBlocks;
 	computeBlocks(sizeInput, e,cells,windowSize,blockSize,normalizedBlocks);
@@ -292,16 +293,16 @@ void hog::computeCells(const cv::Mat& dx, const cv::Mat& dy,
 }
 	
 }
-
+/*
 void hog::obtainTestDescriptor(string fileName,string outputName, int & size,float **descriptor,int sizeCeldas,int sizeBlock)
 {
 	descriptor=new float*[1];
-	trainEx(fileName,0,descriptor,outputName,size,sizeCeldas,sizeBlock);
+	trainEx(fileName,0,descriptor,outputName,size,sizeCeldas,sizeBlock,sizeBin);
 	
-}
+}*/
 
 
-float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock,int & i)
+float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock,int & i, int binSize)
 {
 	//int size;
 	//trainingData=new float*[numTrainExample];
@@ -337,7 +338,7 @@ float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,f
   		
   		cout<<"this is the i of Training"<<i<<endl;	
   			
-  		trainingData=trainEx(newFileName,i,trainingData,outputName,size,sizeCeldas,sizeBlock);
+  		trainingData=trainEx(newFileName,i,trainingData,outputName,size,sizeCeldas,sizeBlock,binSize);
   		i++;
   		/*for(int j=0;j<size;j++)
 	  {
@@ -362,16 +363,16 @@ float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,f
   	return trainingData;
   }
 
-float hog:: predictionHOG(Mat originalImage, int numBlocks,int numCeldas)
+float hog:: predictionHOG(Mat originalImage, int numBlocks,int numCeldas,int binSize)
 {
 	float ** descriptor=new float*[1];
 	int sizeDescriptor;
 	//int i=0;
 	//descriptor=prepareTrainData(1,"bikeList.lst", sizeDescriptor,descriptor,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/bike/");
-	descriptor=trainEx(originalImage,0,descriptor,"descriptor",sizeDescriptor,numCeldas,numBlocks);
+	descriptor=trainEx(originalImage,0,descriptor,"descriptor",sizeDescriptor,numCeldas,numBlocks,binSize);
 	Mat tset(1,sizeDescriptor, CV_32FC1,descriptor);
 	CvSVM svm;
-	svm.load(("bicis.xml"));
+	svm.load(("SVMbicis.xml"));
     float cls = svm.predict(tset.row(0));
     cout << endl<<"Class: " <<fixed << cls <<endl;
     return cls;	
@@ -382,7 +383,7 @@ float hog:: predictionHOG(Mat originalImage, int numBlocks,int numCeldas)
 
 }
 
-float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock,int & i,string ruta)
+float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,float **trainingData,int sizeCeldas,int sizeBlock,int & i,string ruta,int sizeBin)
 {
 	//trainingData=new float*[numTrainExample];
 	 string line;
@@ -404,7 +405,7 @@ float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,f
       		name.append(line);
       		
       		cout<<endl<<"final name: "<<name<<endl<<"value i "<<i;
-      		trainingData=trainEx(name,i,trainingData,"trainingDescr",size,sizeCeldas,sizeBlock);
+      		trainingData=trainEx(name,i,trainingData,"trainingDescr",size,sizeCeldas,sizeBlock,sizeBin);
       		i++;
       		cout<<i;
       //	cout << line << endl;
