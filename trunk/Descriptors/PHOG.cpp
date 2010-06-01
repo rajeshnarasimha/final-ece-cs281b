@@ -31,7 +31,7 @@ inline float dotProduct(float* descriptor, int size){
 
 inline void scaleDescriptor(float* descriptor, int size, float scalar){
   for(int i = 0; i < size; i++){
-    descriptor[i] /= scalar;
+    descriptor[i] *= scalar;
   }
 }
 
@@ -45,9 +45,13 @@ PHOG::~PHOG(void){
 
 float* PHOG::computeDescriptor(const cv::Mat& _img, int& dim, 
                                const cv::Rect& roi, int norm){
+  cv::Mat img;
+  if( roi.width == 0 && roi.height == 0 ){
+    img = _img;
+  }else{
+    img = cv::Mat(_img, roi);
+  }
 
-  cv::Mat img(_img, roi);
-  
   imgSize = cv::Size(img.cols, img.rows);
   
   cv::Mat dx, dy, bin, angle, magn;
@@ -75,7 +79,7 @@ void PHOG::computeDescriptor(const std::vector<cv::Mat>& imgs,
   int counter = 0;
   for( std::vector<cv::Mat>::const_iterator it = imgs.begin(); 
        it != imgs.end(); ++it, counter++ ){
-    descriptor = computeDescriptor( (*it), dim, norm );
+    descriptor = computeDescriptor( (*it), dim, cv::Rect(0,0,0,0), norm );
     if( !descriptor ){ 
       std::cerr << "Skipped Image " << counter << std::endl;
       continue; 
@@ -227,29 +231,31 @@ float* PHOG::computeHistogramPerBlock(const cv::Mat& angle,
 }
 
 void PHOG::normalizeHistogram(float* histogram, const int size, int norm){
-
+  std::cout << "Norm: " << norm << std::endl;
   switch( norm ){
-  case PHOG::L1NORM:
+  case L1NORM:
     {
       float sum = 0.0f;
       for( int i = 0; i < size; i++){
         sum += histogram[i];
       }
-
-      scaleDescriptor(histogram, size, sum);
+      if( sum == 0.0f ){
+        std::cout << "Warning: Norm Zero" << std::endl;
+        sum = 0.0001f;
+      }
+      scaleDescriptor(histogram, size, 1/sum);
     }
     break;
-  case PHOG::L2NORM:
+  case L2NORM:
     {
       float norm = sqrtf( dotProduct(histogram, size) );
       if( norm == 0.0f ){
         std::cout << "Warning: Norm Zero" << std::endl;
         norm = 0.0001f;
       }
-      scaleDescriptor(histogram, size, norm);
+      scaleDescriptor(histogram, size, 1/norm);
     }
     break;
-
   case PHOG::L2NORM_BLOCK:
     {
       

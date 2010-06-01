@@ -45,7 +45,7 @@ static std::string trainStr = "--train";
 static std::string testStr  = "--test";
 
 static CvSVM classifier;
-static PHOG hog(9, 180, 2);
+static PHOG hog(9, 180, 1);
 
 int main(int argc, char** argv){
 
@@ -142,25 +142,46 @@ void train(const std::string& _tset,
   hog.computeDescriptor( images, descriptors, dimension, PHOG::L2NORM );
 
   //Allocate Matrix
-  float** tset   = new float*[descriptors.size()];
+  //float** tset   = new float*[descriptors.size()];
+  float* tset    = new float[descriptors.size()*dimension];
   float* tlabels = new float[descriptors.size()];
 
   idx = 0;
+  int d_it = 0;
+  std::ofstream descriptorsFile("descriptors.dat");
   for( std::vector<float*>::iterator descriptor = descriptors.begin();
        descriptor != descriptors.end(); ++descriptor, idx++){
 
-    tset[idx]    = (*descriptor);
     tlabels[idx] = static_cast<float>( labels[idx] );
 
-    // for( int i = 0; i < dimension; i++){
-    //   descriptorsFile << std::fixed << (*descriptor)[i] << " ";
-    // }
-    // descriptorsFile << std::endl;
+    for( int i = 0; i < dimension; i++){
+      tset[d_it++]    = (*descriptor)[i];
+      descriptorsFile << std::fixed << (*descriptor)[i] << " ";
+    }
+    descriptorsFile << std::endl;
 
   }
+  descriptorsFile.close();
 
-  cv::Mat cvTset(descriptors.size(), dimension, CV_32F, tset);
-  cv::Mat cvLset(labels.size(), 1, CV_32FC1, tlabels);
+  //@@@ Find a good way to pass the allocated array to OpenCV
+  cv::Mat cvTset(descriptors.size(), dimension, CV_32FC1, tset);
+  //cv::Mat cvLset(labels.size(), 1, CV_32FC1, tlabels);
+  cv::Mat cvLset(labels);
+
+  //Testing Matrix
+  std::cout << "cvTset: " << cvTset.rows << "x" << cvTset.cols << std::endl;
+  std::cout << "Step: " << cvTset.step << std::endl;
+  std::ofstream cvdescriptorsFile("cvdescriptors.dat");  
+
+  for( int cv_y = 0; cv_y < cvTset.rows; cv_y++){
+    for( int cv_x = 0; cv_x < cvTset.cols; cv_x++){
+      cvdescriptorsFile << std::fixed << cvTset.at<float>(cv_y,cv_x) << " ";
+    }
+    cvdescriptorsFile << std::endl;
+    std::cout << std::endl;
+  }
+  cvdescriptorsFile.close();
+
   ///////////////////////////////////////////////////////////////////
   //SVM Training
   //////////////////////////////////////////////////////////////////
