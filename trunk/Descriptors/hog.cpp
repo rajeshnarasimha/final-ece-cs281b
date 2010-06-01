@@ -362,13 +362,13 @@ float ** hog::prepareTrainData(int numTrainExample,string fileName, int & size,f
   	return trainingData;
   }
 
-float hog:: predictionHOG(Mat originalImage)
+float hog:: predictionHOG(Mat originalImage, int numBlocks,int numCeldas)
 {
 	float ** descriptor=new float*[1];
 	int sizeDescriptor;
 	//int i=0;
 	//descriptor=prepareTrainData(1,"bikeList.lst", sizeDescriptor,descriptor,8,4,i,"/home/saiph/281b/final-ece-cs281b/test/bike/");
-	descriptor=trainEx(originalImage,0,descriptor,"descriptor",sizeDescriptor,8,4);
+	descriptor=trainEx(originalImage,0,descriptor,"descriptor",sizeDescriptor,numCeldas,numBlocks);
 	Mat tset(1,sizeDescriptor, CV_32FC1,descriptor);
 	CvSVM svm;
 	svm.load(("bicis.xml"));
