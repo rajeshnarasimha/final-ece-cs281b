@@ -1,5 +1,5 @@
-
 #include <PHOG.h>
+#include <hog.h>
 #include <utils.h>
 #include <iostream>
 #include <ml.h>
@@ -15,52 +15,27 @@ static void readDataSet( const path& directory,
                          const std::string& posprefix,
                          std::vector<std::string>& images,
                          std::vector<float>& labels,
-                         bool filter=true );
+                         bool filter=true);
 
-static void train(const std::string& tset, 
-                  const std::string& xml_output);
-
-static void testSVM(const std::string& xml,
+static void testKNN(const std::string& tset,
                     const std::string& test_bed,
-                    const std::string& report);
+                    const std::string& repot);
 
 static inline void usage(void){
-  std::cout << "./phogTest --<train|test> <xml> <dir>" << std::endl;
+  std::cout << "./knnTest <tset> <testset>" << std::endl;
 }
 
-
-bool stringCompare( const std::string &left, const std::string &right ){
-   for( std::string::const_iterator lit = left.begin(), rit = right.begin(); 
-        lit != left.end() && rit != right.end(); ++lit, ++rit )
-      if( tolower( *lit ) < tolower( *rit ) )
-         return true;
-      else if( tolower( *lit ) > tolower( *rit ) )
-         return false;
-   if( left.size() < right.size() )
-      return true;
-   return false;
-}
-
-static std::string trainStr = "--train";
-static std::string testStr  = "--test";
-
-static int L = 5;
-static CvSVM classifier;
+static int L = 6;
 static PHOG phog(9, 180, L);
 
 int main(int argc, char** argv){
 
-  if( argc != 4 ){
+  if( argc != 3 ){
     usage();
     return 1;
   }
 
-  if( !trainStr.compare(argv[1]) ){
-    train(argv[3], argv[2]);
-  }else if( !testStr.compare(argv[1]) ){
-    testSVM(argv[2], argv[3], "Statistics.dat");
-  }
-
+  testKNN(argv[1], argv[2], "Statistics.dat");
 
   return 0;
 }
@@ -77,8 +52,6 @@ void readDataSet( const path& directory,
       unsigned int pos = 0;
       std::string fullPath;
       
-      //std::ofstream imgs("images.txt");
-      //std::ofstream imgs("labels.txt");
       for( directory_iterator iter(directory) ; iter != end ; ++iter )        
         if ( !is_directory( *iter ) ){
           file = iter->path().leaf();
@@ -98,12 +71,10 @@ void readDataSet( const path& directory,
               labels.push_back(1.0f);              
             }
             
-            //std::cout << "Appending ... " << fullPath << std::endl; 
-            //imgs << std::fixed << labels.back() << std::endl;
+            //imgs << fullPath << std::endl;
             images.push_back( fullPath );
           }
         }
-      //imgs.close();
   }else{
     std::cerr << "Directory does not exists " << std::endl;
   }
@@ -112,8 +83,10 @@ void readDataSet( const path& directory,
   //sort(images.begin(), images.end(), stringCompare);
 }
 
-void train(const std::string& _tset, 
-           const std::string& xml_output){
+void testKNN( const std::string& _tset, 
+              const std::string& _testset,
+              const std::string& report ){
+
   std::vector<std::string> files;
   std::vector<cv::Mat> images;
   std::vector<float> labels;
@@ -123,6 +96,7 @@ void train(const std::string& _tset,
 
   std::cout << "NumFiles: " << files.size() << std::endl;
 
+  //Reading the Images
   int idx = 0;
   for( std::vector<std::string>::const_iterator it = files.begin();
        it != files.end(); ++it, idx++){
@@ -168,111 +142,61 @@ void train(const std::string& _tset,
   }
   descriptorsFile.close();
 
-  //@@@ Find a good way to pass the allocated array to OpenCV
   cv::Mat cvTset(descriptors.size(), dimension, CV_32FC1, tset);
-  //cv::Mat cvLset(labels.size(), 1, CV_32FC1, tlabels);
   cv::Mat cvLset(labels);
 
-  //Testing Matrix
-  std::cout << "cvTset: " << cvTset.rows << "x" << cvTset.cols << std::endl;
-  std::cout << "Step: " << cvTset.step << std::endl;
-  std::ofstream cvdescriptorsFile("cvdescriptors.dat");  
-
-  for( int cv_y = 0; cv_y < cvTset.rows; cv_y++){
-    for( int cv_x = 0; cv_x < cvTset.cols; cv_x++){
-      cvdescriptorsFile << std::fixed << cvTset.at<float>(cv_y,cv_x) << " ";
-    }
-    cvdescriptorsFile << std::endl;
-  }
-  cvdescriptorsFile.close();
-
   ///////////////////////////////////////////////////////////////////
-  //SVM Training
+  //KNN Training
   //////////////////////////////////////////////////////////////////
-  std::cout << "Training SVM..." << std::endl;
+  std::cout << "Training K-NN..." << std::endl;
 
-  CvSVMParams params;
-  //params.svm_type = CvSVM::C_SVC;
-  //params.kernel_type = CvSVM::LINEAR;
-  //params.kernel_type = CvSVM::RBF;
-  //params.gamma = 0.95;
-  //params.C = 0.99;
-  //params.svm_type = CvSVM::ONE_CLASS;
-  //params.nu = 0.5;
-  
-  // //CvBoostParams params;
-  // //params.boost_type =CvBoost::GENTLE;
+  CvKNearest classifier;
 
-  //CvSVM classifier;
-  // //CvBoost boost;
-  // // CvANN_MLP nn;
-  // //CvNormalBayesClassifier classifier;
-
-  // // cv::Mat w;
-  // // cv::Mat o;
-
-  // if( !classifier.train(cvTset, cvLset, cv::Mat(), cv::Mat(), params) ){
-  // // if( !boost.train(cvTset, CV_ROW_SAMPLE, cvLset, 
-  // //                  cv::Mat(), cv::Mat(), cv::Mat(), cv::Mat(),
-  // //                  params) ){
-  // //if( !nn.train(cvTset, cvLset, w) ){
   if( !classifier.train(cvTset, cvLset) ){
-  //if( !classifier.train(cvTset, cvLset, cv::Mat(), cv::Mat(), params) ){
     std::cerr << "Cannot Train" << std::endl;
   }
 
-  params = classifier.get_params();
-
-  std::cout << "C: "    << std::fixed << params.C << std::endl;
-  std::cout << "Gamma: "<< std::fixed << params.gamma << std::endl;
-
-  classifier.save(xml_output.c_str());
-
-  //Test
+  ////////////////////////
+  //Test TrainSet
   idx = 0;
   int errors = 0;
-  std::ofstream outfile("train_errors.dat");
   std::vector<std::string>::iterator file_it = files.begin();
   for( std::vector<float*>::iterator descriptor = descriptors.begin();
        descriptor != descriptors.end(); ++descriptor, idx++, ++file_it){
-    float guess = classifier.predict(cvTset.row(idx));
+    float guess = classifier.find_nearest(cvTset.row(idx), 1);
     if( abs(static_cast<float>(labels[idx]) - guess) > 0.0001f  ){
       std::cerr << idx << " Expected: " << std::fixed <<  labels[idx] 
                 << " Got: " << std::fixed << guess << std::endl;
       errors++;
     }
-    outfile << (*file_it) << " " << std::fixed << guess << std::endl;
   }
-  outfile.close();
 
-  std::cout << "Errors: " << errors << std::endl;
-}
+  files.clear();
+  images.clear();
+  labels.clear();
 
-void testSVM(const std::string& xml,
-             const std::string& test_bed,
-             const std::string& report){
-  //Loading 
-  classifier.load(xml.c_str());
+  std::vector<float*>::iterator it_desc;
+  for( it_desc = descriptors.begin(); it_desc != descriptors.end(); ++it_desc){
+    delete [] (*it_desc);
+  }
 
-  CvSVMParams params = classifier.get_params();
+  descriptors.clear();
+  delete [] tset;
+  delete [] tlabels;
 
-  std::cout << "C: "    << std::fixed << params.C << std::endl;
-  std::cout << "Gamma: "<< std::fixed << params.gamma << std::endl;
-
-  std::vector<std::string> files;
-  std::vector<cv::Mat> images;
-  std::vector<float> labels;
-  std::vector<float*> descriptors;
-
-  readDataSet(test_bed, ".ppm", "person_and_bike_", files, labels, false);
+  ////////////////////////
+  //Test
+  ////////////////////////
+  readDataSet( _testset, ".ppm", "person_and_bike_", files, labels, false);
 
   std::cout << "NumFiles: " << files.size() << std::endl;
 
-  int idx = 0;
+  //Reading the Images
+  idx = 0;
   for( std::vector<std::string>::const_iterator it = files.begin();
        it != files.end(); ++it, idx++){
     cv::Mat img = cv::imread((*it));
-    
+
     if( img.empty() ){
       std::cerr << (*it) << " not loaded" << std::endl;
     }
@@ -283,47 +207,80 @@ void testSVM(const std::string& xml,
     images.push_back( img_gray );
   }
 
-  
-  int dimension = 0;
+
+  //////////////////////////////////////////////////////////////////
+  //Computing Descriptors
+  std::cout << "Computing Descriptors..." << std::endl;
+
+  dimension = 0;
   phog.computeDescriptor( images, descriptors, dimension, PHOG::L2NORM );
 
   //Allocate Matrix
-  float** tset   = new float*[descriptors.size()];
-  float* tlabels = new float[descriptors.size()];
+  tset    = new float[descriptors.size()*dimension];
+  tlabels = new float[descriptors.size()];
 
   idx = 0;
+  d_it = 0;
   for( std::vector<float*>::iterator descriptor = descriptors.begin();
        descriptor != descriptors.end(); ++descriptor, idx++){
 
-    tset[idx]    = (*descriptor);
     tlabels[idx] = static_cast<float>( labels[idx] );
 
+    for( int i = 0; i < dimension; i++){
+      tset[d_it++]    = (*descriptor)[i];
+    }
   }
 
-  float* lintset = imgutils::mat2linarray((const float**)tset, 
-                                          dimension, descriptors.size());
+  cvTset = cv::Mat(descriptors.size(), dimension, CV_32FC1, tset);
+  cvLset = cv::Mat(labels);
 
-  
-  
-  cv::Mat cvTset(descriptors.size(), dimension, CV_32F, lintset);
-  cv::Mat cvLset(labels.size(), 1, CV_32FC1, tlabels);
 
-  //Test
+  //Testing
+  //
+  std::cout << "Testing TestSet" << std::endl;
+
+  // 0 => 1
+  // 1 => -1
+  int class_errors[] = {0,0};
+
   idx = 0;
-  int errors = 0;
-  std::ofstream outfile("test_errors.dat");
-  std::vector<std::string>::iterator file_it = files.begin();
+  errors = 0;
+  file_it = files.begin();
   for( std::vector<float*>::iterator descriptor = descriptors.begin();
        descriptor != descriptors.end(); ++descriptor, idx++, ++file_it){
-    float guess = classifier.predict(cvTset.row(idx));
+    float guess = classifier.find_nearest(cvTset.row(idx), 1);
     if( abs(static_cast<float>(labels[idx]) - guess) > 0.0001f  ){
       std::cerr << idx << " Expected: " << std::fixed <<  labels[idx] 
                 << " Got: " << std::fixed << guess << std::endl;
       errors++;
+      class_errors[ labels[idx] == 1 ? 0 : 1 ] += 1;
     }
-    outfile << (*file_it) << " " << std::fixed << guess << std::endl;
   }
-  outfile.close();
 
+  std::ofstream reportFile(report.c_str());
   std::cout << "Errors: " << errors << std::endl;
+  std::cout << "Class Bikers  " << class_errors[0] << std::endl;
+  std::cout << "Class Persons " << class_errors[1] << std::endl;
+
+  reportFile << "L: "    << L << std::endl;
+  reportFile << "Size: " << descriptors.size() << std::endl;
+  reportFile << "Errors: " << errors << std::endl;
+  reportFile << "Class Bikers  " << class_errors[0] << std::endl;
+  reportFile << "Class Persons " << class_errors[1] << std::endl;
+
+  reportFile.close();
+
+  //
+  files.clear();
+  images.clear();
+  labels.clear();
+
+  for( it_desc = descriptors.begin(); it_desc != descriptors.end(); ++it_desc){
+    delete [] (*it_desc);
+  }
+
+  descriptors.clear();
+  delete [] tset;
+  delete [] tlabels;
 }
+

@@ -9,6 +9,8 @@
 
 #include <MotionAnalyzer.h>
 
+#include <iostream>
+
 MotionAnalyzer::MotionAnalyzer( const std::string& file ){
   times.open( file.c_str() );
 }
@@ -44,6 +46,10 @@ void MotionAnalyzer::computeVelocities(void){
 
   double dt      = *t - *(t - 1);
   cv::Point2f dp = *p - *(p - 1);
+
+  if( dt == 0.0 ){
+    return;
+  }
 
   dp.x /= static_cast<float>(dt);
   dp.y /= static_cast<float>(dt);
