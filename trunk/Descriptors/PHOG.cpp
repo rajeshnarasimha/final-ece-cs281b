@@ -231,7 +231,6 @@ float* PHOG::computeHistogramPerBlock(const cv::Mat& angle,
 }
 
 void PHOG::normalizeHistogram(float* histogram, const int size, int norm){
-  std::cout << "Norm: " << norm << std::endl;
   switch( norm ){
   case L1NORM:
     {
@@ -240,7 +239,7 @@ void PHOG::normalizeHistogram(float* histogram, const int size, int norm){
         sum += histogram[i];
       }
       if( sum == 0.0f ){
-        std::cout << "Warning: Norm Zero" << std::endl;
+        std::cout << "<<PHOG>>[Warning] : Norm Zero" << std::endl;
         sum = 0.0001f;
       }
       scaleDescriptor(histogram, size, 1/sum);

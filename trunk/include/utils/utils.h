@@ -188,7 +188,10 @@ namespace imgutils{
   void detectBlobs( cv::Mat& frame, std::vector<cv::Rect>& rois, 
                     const cv::Point& offset,
                     const unsigned int minAreaThreshold,
-                    const unsigned int maxAreaThreshold );
+                    const unsigned int maxAreaThreshold,
+                    const cv::Size& size,
+                    const double aspectRatio, 
+                    const double variance);
 
 }
 
