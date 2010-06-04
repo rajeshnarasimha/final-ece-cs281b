@@ -9,16 +9,14 @@
 
 #include <ClassifierWrapper.h>
 
-
-//#include <hog.h>
-
 ClassifierWrapper::ClassifierWrapper(const std::string& xml,
                                      const int _cellsPerBlock,
                                      const int _pixelsPerCells,
                                      const int _bins, 
                                      const int _maxAngle,
                                      const int _l, //Pyramid Levels only if PHOG
-                                     enum DescriptorType _descriptorType) : 
+                                     enum DescriptorType _descriptorType,
+                                     enum MLType mlType) : 
   cellsPerBlock( _cellsPerBlock), pixelsPerCells(_pixelsPerCells), 
   bins(_bins), maxAngle(_maxAngle), l(_l)
 {
@@ -47,6 +45,11 @@ ClassifierWrapper::~ClassifierWrapper( void ){
   if( phog ){
     delete phog;
   }
+}
+
+void ClassifierWrapper::trainKNN(const std::string& trainingSet, 
+                                 const std::string& labels, int k){
+  //knn.train();
 }
 
 float ClassifierWrapper::predict( const cv::Mat& img ){

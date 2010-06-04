@@ -24,8 +24,7 @@ public:
   
   enum MLType{
     SVM,
-    KNN,
-    BOOSTING
+    KNN
   };
 
   explicit ClassifierWrapper(const std::string& xml,
@@ -34,10 +33,15 @@ public:
                              const int bins=9, 
                              const int maxAngle=180,
                              const int l=3, //Pyramid Levels only if PHOG
-                             enum DescriptorType descriptor_type=HOG);
+                             enum DescriptorType descriptor_type=HOG,
+                             enum MLType mlType = SVM );
   
   ~ClassifierWrapper(void);
   
+  void trainKNN(const std::string& trainingSet, 
+                const std::string& labels, 
+                int k = 32);
+
   float predict(const cv::Mat& img);
   
 private:
@@ -49,6 +53,7 @@ private:
   const int l;
 
   CvSVM svm;
+  CvKNearest knn;
   int descriptorType;
   PHOG* phog;
   
