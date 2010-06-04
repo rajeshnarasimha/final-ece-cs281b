@@ -317,7 +317,10 @@ void imgutils::detectBlobs( cv::Mat& frame,
                             std::vector<cv::Rect>& rois,
                             const cv::Point& offset,
                             const unsigned int minAreaThreshold,
-                            const unsigned int maxAreaThreshold ){
+                            const unsigned int maxAreaThreshold,
+                            const cv::Size& size,
+                            const double minAspectRatio,
+                            const double maxAspectRatio ){
   std::vector< std::vector<cv::Point> > contours;
   cv::findContours(frame, contours, CV_RETR_EXTERNAL, 
                    CV_CHAIN_APPROX_SIMPLE, offset);
@@ -328,16 +331,20 @@ void imgutils::detectBlobs( cv::Mat& frame,
 
   for( row_it = contours.begin(); row_it != contours.end(); ++row_it){
     std::sort( (*row_it).begin(), (*row_it).end(), xDiff);
-    int x  = (*row_it)[0].x - offset.x;
-    int dx = (*row_it).back().x - x + offset.x + 1;
+    int x  = std::max( std::min( (*row_it)[0].x - offset.x, size.width - 1 ), 
+                       0);
+    int dx = std::min( (*row_it).back().x - x + offset.x + 1, size.width - x - 1);
+
+    //Validating that does not goes out of bound
 
     std::sort( (*row_it).begin(), (*row_it).end(), yDiff);
-    int y  = (*row_it)[0].y - offset.y;
-    int dy = (*row_it).back().y - y + offset.y + 1;
+    int y  = std::max( std::min( (*row_it)[0].y - offset.y, size.height - 1), 
+                       0);
+    int dy = std::min( (*row_it).back().y - y + offset.y + 1, size.height - y - 1);
 
-    //See if the blobs are close to each other
+    //@@@ TODO: See if the blobs are close to each other
     //Merge them if necessary
-    //This would be using a Voronoi, or any KD-Tree
+    //This would be using a Proximity algorithm i.e. Voronoi ...
 
     unsigned int area = dx*dy;
     if( area < minAreaThreshold ){
@@ -346,6 +353,12 @@ void imgutils::detectBlobs( cv::Mat& frame,
 
     if( area > maxAreaThreshold ){
       continue;
+    }
+
+    if( dx > 0 && dy > 0 ){
+      double ar = double(dy) / double(dx);
+      if( ar < minAspectRatio || ar > maxAspectRatio )
+        continue;
     }
 
     cv::Rect roi(x,y,dx,dy);

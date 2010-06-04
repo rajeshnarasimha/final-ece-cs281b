@@ -45,7 +45,7 @@ static std::string trainStr = "--train";
 static std::string testStr  = "--test";
 
 static CvSVM classifier;
-static PHOG hog(9, 180, 1);
+static PHOG hog(9, 180, 5);
 
 int main(int argc, char** argv){
 
@@ -76,6 +76,8 @@ void readDataSet( const path& directory,
       unsigned int pos = 0;
       std::string fullPath;
       
+      //std::ofstream imgs("images.txt");
+      //std::ofstream imgs("labels.txt");
       for( directory_iterator iter(directory) ; iter != end ; ++iter )        
         if ( !is_directory( *iter ) ){
           file = iter->path().leaf();
@@ -96,9 +98,11 @@ void readDataSet( const path& directory,
             }
             
             //std::cout << "Appending ... " << fullPath << std::endl; 
+            //imgs << std::fixed << labels.back() << std::endl;
             images.push_back( fullPath );
           }
         }
+      //imgs.close();
   }else{
     std::cerr << "Directory does not exists " << std::endl;
   }
@@ -178,7 +182,6 @@ void train(const std::string& _tset,
       cvdescriptorsFile << std::fixed << cvTset.at<float>(cv_y,cv_x) << " ";
     }
     cvdescriptorsFile << std::endl;
-    std::cout << std::endl;
   }
   cvdescriptorsFile.close();
 
@@ -189,7 +192,8 @@ void train(const std::string& _tset,
 
   CvSVMParams params;
   params.svm_type = CvSVM::C_SVC;
-  params.kernel_type = CvSVM::LINEAR;
+  //params.kernel_type = CvSVM::LINEAR;
+  params.kernel_type = CvSVM::RBF;
   params.gamma = 0.95;
   params.C = 0.99;
   //params.svm_type = CvSVM::ONE_CLASS;
@@ -295,7 +299,12 @@ void testSVM(const std::string& xml,
 
   }
 
-  cv::Mat cvTset(descriptors.size(), dimension, CV_32F, tset);
+  float* lintset = imgutils::mat2linarray((const float**)tset, 
+                                          dimension, descriptors.size());
+
+  
+  
+  cv::Mat cvTset(descriptors.size(), dimension, CV_32F, lintset);
   cv::Mat cvLset(labels.size(), 1, CV_32FC1, tlabels);
 
   //Test

@@ -22,6 +22,12 @@ public:
     PYR_HOG
   };
   
+  enum MLType{
+    SVM,
+    KNN,
+    BOOSTING
+  };
+
   explicit ClassifierWrapper(const std::string& xml,
                              const int cellsPerBlock=4,
                              const int pixelsPerCells=8,

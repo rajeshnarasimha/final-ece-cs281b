@@ -137,6 +137,10 @@ testPHOG: $(OBJS) test/PHOGTest.cpp
 	$(CXX) -c -g -ggdb test/PHOGTest.cpp $(CXXFLAGS) -o test/PHOGTest.o
 	$(LD) -o test/phogTest $(OBJS) test/PHOGTest.o $(LDLIBS) -lboost_filesystem
 
+testKNN: $(OBJS) test/testKNN.cpp
+	$(CXX) -c -g -ggdb test/testKNN.cpp $(CXXFLAGS) -o test/testKNN.o
+	$(LD) -o test/knnTest $(OBJS) test/testKNN.o $(LDLIBS) -lboost_filesystem
+
 testInt: $(OBJS) test/IntegralTest.cpp
 	$(CXX) -c -g -ggdb test/IntegralTest.cpp $(CXXFLAGS) -o test/IntegralTest.o
 	$(LD) -o test/integralTest $(OBJS) test/IntegralTest.o $(LDLIBS)
